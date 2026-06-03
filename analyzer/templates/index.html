@@ -1397,39 +1397,10 @@
             }
         })();
 
-        // Button loading state on submit and Client-Side Fetch for HF
-        document.getElementById('sentimentForm').addEventListener('submit', async function(e) {
-            const algoritma = document.getElementById('algoritma_input').value;
+        // Button loading state on submit
+        document.getElementById('sentimentForm').addEventListener('submit', function() {
             const btn = document.getElementById('btnSubmit');
-            
-            if (algoritma === 'IndoBERT') {
-                e.preventDefault();
-                btn.classList.add('loading');
-                const btnText = btn.querySelector('.btn-text');
-                btnText.style.opacity = '0';
-                
-                try {
-                    const text = document.getElementById('teks_ulasan').value;
-                    const res = await fetch("https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({inputs: text})
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        document.getElementById('hf_raw_result').value = JSON.stringify(data);
-                        this.submit();
-                    } else {
-                        document.getElementById('hf_raw_result').value = "HTTP_ERROR_" + res.status;
-                        this.submit();
-                    }
-                } catch(err) {
-                    document.getElementById('hf_raw_result').value = "FETCH_ERROR_" + err.message;
-                    this.submit();
-                }
-            } else {
-                btn.classList.add('loading');
-            }
+            btn.classList.add('loading');
         });
 
         // Animate confidence bar on page load

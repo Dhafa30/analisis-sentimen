@@ -71,44 +71,44 @@ def home(request):
 
         # --- JIKA MEMILIH INDOBERT ---
         elif algoritma == "IndoBERT":
-            hf_raw_result = request.POST.get('hf_raw_result', '')
-            if hf_raw_result:
-                if hf_raw_result.startswith('HTTP_ERROR_'):
-                    status = hf_raw_result.split('_')[-1]
-                    sentimen = f"Error: Model sedang loading di browser (Tunggu 20 detik lalu klik lagi) - HTTP {status}"
-                    skor = "-"
-                elif hf_raw_result.startswith('FETCH_ERROR_'):
-                    err_msg = hf_raw_result.replace('FETCH_ERROR_', '')
-                    sentimen = f"Error Jaringan Browser: {err_msg}"
-                    skor = "-"
-                else:
-                    try:
-                        result = json.loads(hf_raw_result)
-                        if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-                            scores = result[0]
-                            score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
-                            score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
-                            
-                            prob_negatif = round(score_negatif * 100, 1)
-                            prob_positif = round(score_positif * 100, 1)
-                            
-                            if prob_positif > prob_negatif:
-                                sentimen = "Positif"
-                                confidence = prob_positif
-                            else:
-                                sentimen = "Negatif"
-                                confidence = prob_negatif
-                                
-                            skor = "HuggingFace API (Client-Side)"
-                            metrik = context['base_metrik_indobert']
+            try:
+                import http.client
+                conn = http.client.HTTPSConnection("api-inference.huggingface.co", timeout=60)
+                payload = json.dumps({"inputs": teks_ulasan}).encode('utf-8')
+                headers = {'Content-Type': 'application/json'}
+                
+                conn.request("POST", "/models/Dhafa30/model_indobert_pln", body=payload, headers=headers)
+                response = conn.getresponse()
+                result_str = response.read().decode('utf-8')
+                
+                if response.status == 200:
+                    result = json.loads(result_str)
+                    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                        scores = result[0]
+                        score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
+                        score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
+                        
+                        prob_negatif = round(score_negatif * 100, 1)
+                        prob_positif = round(score_positif * 100, 1)
+                        
+                        if prob_positif > prob_negatif:
+                            sentimen = "Positif"
+                            confidence = prob_positif
                         else:
-                            sentimen = f"Error: Format balasan API tidak sesuai ({hf_raw_result})"
-                            skor = "-"
-                    except Exception as e:
-                        sentimen = f"Error Parsing JSON: {str(e)}"
+                            sentimen = "Negatif"
+                            confidence = prob_negatif
+                            
+                        skor = "HuggingFace API (Backend Proxy)"
+                        metrik = context['base_metrik_indobert']
+                    else:
+                        sentimen = f"Error: Format balasan API tidak sesuai ({result_str})"
                         skor = "-"
-            else:
-                sentimen = "Error: Javascript gagal mengirim hasil"
+                else:
+                    sentimen = f"Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi) - HTTP {response.status}"
+                    skor = "-"
+                    
+            except Exception as e:
+                sentimen = f"Error Jaringan Vercel (Backend): {str(e)}"
                 skor = "-"
 
         # --- GENERATE KESIMPULAN ---
