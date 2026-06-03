@@ -136,7 +136,7 @@ def home(request):
                     payload_json = json.dumps({"inputs": teks_ulasan})
                     
                     cmd = [
-                        "curl", "-s", "-X", "POST", url,
+                        "curl", "-s", "-k", "-X", "POST", url,
                         "--resolve", f"api-inference.huggingface.co:443:{cf_ip}",
                         "-H", "Content-Type: application/json",
                         "-d", payload_json
