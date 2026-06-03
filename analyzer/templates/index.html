@@ -1397,67 +1397,10 @@
             }
         })();
 
-        // Button loading state on submit and Client-Side Fetch for HF using Proxy
-        document.getElementById('sentimentForm').addEventListener('submit', async function(e) {
-            const algoritma = document.getElementById('algoritma_input').value;
+        // Button loading state on submit
+        document.getElementById('sentimentForm').addEventListener('submit', function() {
             const btn = document.getElementById('btnSubmit');
-            
-            if (algoritma === 'IndoBERT') {
-                e.preventDefault();
-                btn.classList.add('loading');
-                const btnText = btn.querySelector('.btn-text');
-                btnText.style.opacity = '0';
-                
-                try {
-                    const text = document.getElementById('teks_ulasan').value;
-                    const targetUrl = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln";
-                    const payload = {inputs: text};
-                    
-                    let res;
-                    let success = false;
-                    
-                    // Coba proxy codetabs
-                    try {
-                        res = await fetch("https://api.codetabs.com/v1/proxy?quest=" + targetUrl, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(payload)
-                        });
-                        if (res.ok) success = true;
-                    } catch(e1) {}
-                    
-                    // Fallback proxy corsproxy.io
-                    if (!success) {
-                        try {
-                            res = await fetch("https://corsproxy.io/?" + encodeURIComponent(targetUrl), {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify(payload)
-                            });
-                        } catch(e2) {
-                            // JIKA SEMUA PROXY GAGAL KARENA DIBLOKIR ISP/BROWSER:
-                            // Submit dengan hf_raw_result KOSONG agar Backend Fallback mengambil alih
-                            document.getElementById('hf_raw_result').value = "";
-                            this.submit();
-                            return;
-                        }
-                    }
-                    
-                    if (res && res.ok) {
-                        const data = await res.text();
-                        document.getElementById('hf_raw_result').value = data;
-                        this.submit();
-                    } else if (res) {
-                        document.getElementById('hf_raw_result').value = "HTTP_ERROR_" + res.status;
-                        this.submit();
-                    }
-                } catch(err) {
-                    document.getElementById('hf_raw_result').value = "FETCH_ERROR_" + err.message;
-                    this.submit();
-                }
-            } else {
-                btn.classList.add('loading');
-            }
+            btn.classList.add('loading');
         });
 
         // Animate confidence bar on page load

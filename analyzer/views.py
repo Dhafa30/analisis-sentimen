@@ -71,116 +71,63 @@ def home(request):
 
         # --- JIKA MEMILIH INDOBERT ---
         elif algoritma == "IndoBERT":
-            hf_raw_result = request.POST.get('hf_raw_result', '')
-            if hf_raw_result:
-                if hf_raw_result.startswith('HTTP_ERROR_'):
-                    status = hf_raw_result.split('_')[-1]
-                    if status == "503":
-                        sentimen = f"Error: Model sedang loading di server (Tunggu 20 detik lalu klik lagi) - HTTP 503"
-                    else:
-                        sentimen = f"Error HuggingFace API - HTTP {status}"
-                    skor = "-"
-                elif hf_raw_result.startswith('FETCH_ERROR_'):
-                    err_msg = hf_raw_result.replace('FETCH_ERROR_', '')
-                    sentimen = f"Error Jaringan Browser: {err_msg}"
-                    skor = "-"
-                else:
-                    try:
-                        result = json.loads(hf_raw_result)
-                        if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-                            scores = result[0]
-                            score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
-                            score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
-                            
-                            prob_negatif = round(score_negatif * 100, 1)
-                            prob_positif = round(score_positif * 100, 1)
-                            
-                            if prob_positif > prob_negatif:
-                                sentimen = "Positif"
-                                confidence = prob_positif
-                            else:
-                                sentimen = "Negatif"
-                                confidence = prob_negatif
-                                
-                            skor = "HuggingFace API (via Browser Proxy)"
-                            metrik = context['base_metrik_indobert']
-                        elif isinstance(result, dict) and "error" in result:
-                            if "loading" in str(result["error"]).lower() or "estimated_time" in result:
-                                sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
-                            else:
-                                sentimen = f"Error Server HF: {result['error']}"
-                            skor = "-"
-                        else:
-                            sentimen = f"Error: Format balasan API tidak sesuai ({hf_raw_result[:50]})"
-                            skor = "-"
-                    except Exception as e:
-                        sentimen = f"Error Parsing JSON: {str(e)}"
-                        skor = "-"
-            else:
-                # FALLBACK BACKEND: IP Spoofing CloudFront untuk bypass DNS Block & Errno 16
+            try:
+                # Menggunakan urllib.request murni dengan model Publik IndoBERT dan Token Akses
+                url = "https://router.huggingface.co/hf-inference/models/mdhugol/indonesia-bert-sentiment-classification"
+                payload = {"inputs": teks_ulasan}
+                data = json.dumps(payload).encode('utf-8')
+                
+                # Mengambil Token dari Environment Variable Vercel
+                hf_token = os.environ.get('HF_TOKEN', '')
+                
+                req = urllib.request.Request(url, data=data, headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {hf_token}'
+                })
+                
                 try:
-                    import subprocess
+                    res = urllib.request.urlopen(req, timeout=15)
+                    response_data = res.read().decode('utf-8')
+                    result = json.loads(response_data)
                     
-                    # 1. Dapatkan IP CloudFront terbaru dari huggingface.co via Google DoH
-                    try:
-                        cmd_dns = ["curl", "-s", "https://dns.google/resolve?name=huggingface.co&type=A"]
-                        dns_output = subprocess.check_output(cmd_dns, timeout=10).decode('utf-8')
-                        dns_data = json.loads(dns_output)
-                        cf_ip = next((ans["data"] for ans in dns_data.get("Answer", []) if ans["type"] == 1), "13.35.202.121")
-                    except Exception:
-                        cf_ip = "13.35.202.121" # Fallback statis IP CloudFront HuggingFace
+                    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                        scores = result[0]
                         
-                    # 2. Tembak menggunakan CURL dengan flag --resolve untuk bypass DNS Vercel 
-                    # tapi tetap mengirimkan SNI TLS yang benar ke CloudFront (mencegah Exit Status 35)
-                    url = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
-                    payload_json = json.dumps({"inputs": teks_ulasan})
-                    
-                    cmd = [
-                        "curl", "-s", "-k", "-X", "POST", url,
-                        "--resolve", f"api-inference.huggingface.co:443:{cf_ip}",
-                        "-H", "Content-Type: application/json",
-                        "-d", payload_json
-                    ]
-                    
-                    curl_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=60)
-                    result_str = curl_output.decode('utf-8')
-                    
-                    if not result_str.strip():
-                        sentimen = "Error: Balasan API kosong (Backend IP Bypass)"
-                        skor = "-"
-                    else:
-                        result = json.loads(result_str)
-                        if isinstance(result, dict) and "error" in result:
-                            err_msg = str(result["error"])
-                            if "loading" in err_msg.lower() or "estimated_time" in result:
-                                sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
-                                skor = "-"
-                            else:
-                                sentimen = f"Error Server HF (Backend Bypass): {err_msg}"
-                                skor = "-"
-                        elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-                            scores = result[0]
-                            score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
-                            score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
-                            
-                            prob_negatif = round(score_negatif * 100, 1)
-                            prob_positif = round(score_positif * 100, 1)
-                            
-                            if prob_positif > prob_negatif:
-                                sentimen = "Positif"
-                                confidence = prob_positif
-                            else:
-                                sentimen = "Negatif"
-                                confidence = prob_negatif
-                                
-                            skor = "HuggingFace API (Ultimate Backend Fallback)"
-                            metrik = context['base_metrik_indobert']
+                        # mdhugol model mapping: LABEL_0 = Positif, LABEL_2 = Negatif, LABEL_1 = Netral
+                        score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
+                        score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_2'), 0.0)
+                        
+                        prob_positif = round(score_positif * 100, 1)
+                        prob_negatif = round(score_negatif * 100, 1)
+                        
+                        if prob_positif > prob_negatif:
+                            sentimen = "Positif"
+                            confidence = prob_positif
                         else:
-                            sentimen = f"Error: Format API tidak sesuai ({result_str[:50]})"
-                            skor = "-"
-                except Exception as e:
-                    sentimen = f"Error Kritis Vercel (Semua Jalur Gagal): {str(e)}"
+                            sentimen = "Negatif"
+                            confidence = prob_negatif
+                            
+                        skor = f"HuggingFace API (Serverless Router)"
+                    else:
+                        sentimen = "Error: Format balasan API tidak dikenali"
+                        skor = "-"
+                        
+                except urllib.error.HTTPError as e:
+                    if e.code == 503:
+                        sentimen = "Error: Model sedang loading di server (Tunggu 20 detik lalu klik lagi)"
+                    else:
+                        error_body = e.read().decode('utf-8')
+                        sentimen = f"Error HuggingFace API - HTTP {e.code}"
                     skor = "-"
+                except urllib.error.URLError as e:
+                    sentimen = f"Error Jaringan Backend: {e.reason}"
+                    skor = "-"
+                    
+            except Exception as e:
+                sentimen = f"Error Internal Backend: {str(e)}"
+                skor = "-"
+                
+            metrik = context['base_metrik_indobert']
 
         # --- GENERATE KESIMPULAN ---
         kesimpulan = ""
