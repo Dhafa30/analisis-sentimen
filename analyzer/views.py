@@ -97,8 +97,14 @@ def home(request):
                         score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
                         score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_2'), 0.0)
                         
-                        prob_positif = round(score_positif * 100, 1)
-                        prob_negatif = round(score_negatif * 100, 1)
+                        # Normalisasi agar totalnya 100% karena UI hanya menampilkan Positif & Negatif (mengabaikan Netral)
+                        total_score = score_positif + score_negatif
+                        if total_score > 0:
+                            prob_positif = round((score_positif / total_score) * 100, 1)
+                            prob_negatif = round(100.0 - prob_positif, 1)
+                        else:
+                            prob_positif = 50.0
+                            prob_negatif = 50.0
                         
                         if prob_positif > prob_negatif:
                             sentimen = "Positif"
