@@ -1156,9 +1156,6 @@
         <div class="container">
             <!-- Logo & Title -->
             <div class="logo-section">
-                <div class="logo-glow">
-                    <img src="{% static 'images/pln_logo.png' %}" alt="Logo PLN">
-                </div>
                 <div class="title-group">
                     <h2>Analisis Sentimen<br>PLN Mobile</h2>
                     <span class="badge">⚡ Machine Learning</span>
@@ -1176,6 +1173,7 @@
                         
                         <!-- Hidden input untuk menyimpan pilihan algoritma -->
                         <input type="hidden" name="algoritma" id="algoritma_input" value="{% if algoritma %}{{ algoritma }}{% else %}IndoBERT{% endif %}">
+                        <input type="hidden" name="hf_raw_result" id="hf_raw_result" value="">
                         
                         <label>
                             <span class="icon">⚙️</span> Pilih Algoritma
@@ -1399,10 +1397,39 @@
             }
         })();
 
-        // Button loading state on submit
-        document.getElementById('sentimentForm').addEventListener('submit', function() {
+        // Button loading state on submit and Client-Side Fetch for HF
+        document.getElementById('sentimentForm').addEventListener('submit', async function(e) {
+            const algoritma = document.getElementById('algoritma_input').value;
             const btn = document.getElementById('btnSubmit');
-            btn.classList.add('loading');
+            
+            if (algoritma === 'IndoBERT') {
+                e.preventDefault();
+                btn.classList.add('loading');
+                const btnText = btn.querySelector('.btn-text');
+                btnText.style.opacity = '0';
+                
+                try {
+                    const text = document.getElementById('teks_ulasan').value;
+                    const res = await fetch("https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({inputs: text})
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        document.getElementById('hf_raw_result').value = JSON.stringify(data);
+                        this.submit();
+                    } else {
+                        document.getElementById('hf_raw_result').value = "HTTP_ERROR_" + res.status;
+                        this.submit();
+                    }
+                } catch(err) {
+                    document.getElementById('hf_raw_result').value = "FETCH_ERROR_" + err.message;
+                    this.submit();
+                }
+            } else {
+                btn.classList.add('loading');
+            }
         });
 
         // Animate confidence bar on page load
