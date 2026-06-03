@@ -72,18 +72,36 @@ def home(request):
         # --- JIKA MEMILIH INDOBERT ---
         elif algoritma == "IndoBERT":
             try:
-                import http.client
-                conn = http.client.HTTPSConnection("api-inference.huggingface.co", timeout=60)
-                payload = json.dumps({"inputs": teks_ulasan}).encode('utf-8')
-                headers = {'Content-Type': 'application/json'}
+                import subprocess
+                API_URL = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
+                payload_json = json.dumps({"inputs": teks_ulasan})
                 
-                conn.request("POST", "/models/Dhafa30/model_indobert_pln", body=payload, headers=headers)
-                response = conn.getresponse()
-                result_str = response.read().decode('utf-8')
+                cmd = [
+                    "curl", "-s", "-X", "POST", API_URL,
+                    "-H", "Content-Type: application/json",
+                    "-d", payload_json
+                ]
                 
-                if response.status == 200:
+                # Jalankan curl di level sistem operasi (Bypass bug socket Python Vercel)
+                curl_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=60)
+                result_str = curl_output.decode('utf-8')
+                
+                if not result_str.strip():
+                    sentimen = "Error: Balasan API kosong"
+                    skor = "-"
+                else:
                     result = json.loads(result_str)
-                    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                    
+                    if isinstance(result, dict) and "error" in result:
+                        err_msg = str(result["error"])
+                        if "loading" in err_msg.lower() or "estimated_time" in result:
+                            sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
+                            skor = "-"
+                        else:
+                            sentimen = f"Error Server HF: {err_msg}"
+                            skor = "-"
+                            
+                    elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
                         scores = result[0]
                         score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
                         score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
@@ -98,17 +116,14 @@ def home(request):
                             sentimen = "Negatif"
                             confidence = prob_negatif
                             
-                        skor = "HuggingFace API (Backend Proxy)"
+                        skor = "HuggingFace API (via CURL)"
                         metrik = context['base_metrik_indobert']
                     else:
-                        sentimen = f"Error: Format balasan API tidak sesuai ({result_str})"
+                        sentimen = f"Error: Format balasan API tidak sesuai ({result_str[:50]})"
                         skor = "-"
-                else:
-                    sentimen = f"Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi) - HTTP {response.status}"
-                    skor = "-"
-                    
+                        
             except Exception as e:
-                sentimen = f"Error Jaringan Vercel (Backend): {str(e)}"
+                sentimen = f"Error Jaringan Vercel (CURL): {str(e)}"
                 skor = "-"
 
         # --- GENERATE KESIMPULAN ---
