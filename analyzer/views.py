@@ -130,14 +130,14 @@ def home(request):
                     except Exception:
                         cf_ip = "13.35.202.121" # Fallback statis IP CloudFront HuggingFace
                         
-                    # 2. Tembak langsung ke IP CloudFront menggunakan CURL (Bypass Python SSL/Network Bug Errno 16)
-                    # Menggunakan Host header untuk memberitahu CloudFront tujuan aslinya
-                    url = f"https://{cf_ip}/models/Dhafa30/model_indobert_pln"
+                    # 2. Tembak menggunakan CURL dengan flag --resolve untuk bypass DNS Vercel 
+                    # tapi tetap mengirimkan SNI TLS yang benar ke CloudFront (mencegah Exit Status 35)
+                    url = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
                     payload_json = json.dumps({"inputs": teks_ulasan})
                     
                     cmd = [
-                        "curl", "-s", "-k", "-X", "POST", url,
-                        "-H", "Host: api-inference.huggingface.co",
+                        "curl", "-s", "-X", "POST", url,
+                        "--resolve", f"api-inference.huggingface.co:443:{cf_ip}",
                         "-H", "Content-Type: application/json",
                         "-d", payload_json
                     ]
