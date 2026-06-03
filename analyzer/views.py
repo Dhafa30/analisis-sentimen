@@ -117,19 +117,36 @@ def home(request):
                         sentimen = f"Error Parsing JSON: {str(e)}"
                         skor = "-"
             else:
-                # FALLBACK BACKEND: Jika JS frontend gagal atau cache HTML lama
+                # FALLBACK BACKEND: IP Spoofing CloudFront untuk bypass DNS Block & Errno 16
                 try:
                     import subprocess
-                    HF_URL = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
-                    PROXY_URL = f"https://api.codetabs.com/v1/proxy?quest={HF_URL}"
+                    
+                    # 1. Dapatkan IP CloudFront terbaru dari huggingface.co via Google DoH
+                    try:
+                        cmd_dns = ["curl", "-s", "https://dns.google/resolve?name=huggingface.co&type=A"]
+                        dns_output = subprocess.check_output(cmd_dns, timeout=10).decode('utf-8')
+                        dns_data = json.loads(dns_output)
+                        cf_ip = next((ans["data"] for ans in dns_data.get("Answer", []) if ans["type"] == 1), "13.35.202.121")
+                    except Exception:
+                        cf_ip = "13.35.202.121" # Fallback statis IP CloudFront HuggingFace
+                        
+                    # 2. Tembak langsung ke IP CloudFront menggunakan CURL (Bypass Python SSL/Network Bug Errno 16)
+                    # Menggunakan Host header untuk memberitahu CloudFront tujuan aslinya
+                    url = f"https://{cf_ip}/models/Dhafa30/model_indobert_pln"
                     payload_json = json.dumps({"inputs": teks_ulasan})
-                    cmd = ["curl", "-s", "-X", "POST", PROXY_URL, "-H", "Content-Type: application/json", "-d", payload_json]
+                    
+                    cmd = [
+                        "curl", "-s", "-k", "-X", "POST", url,
+                        "-H", "Host: api-inference.huggingface.co",
+                        "-H", "Content-Type: application/json",
+                        "-d", payload_json
+                    ]
                     
                     curl_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=60)
                     result_str = curl_output.decode('utf-8')
                     
                     if not result_str.strip():
-                        sentimen = "Error: Balasan Backend Proxy kosong"
+                        sentimen = "Error: Balasan API kosong (Backend IP Bypass)"
                         skor = "-"
                     else:
                         result = json.loads(result_str)
@@ -139,7 +156,7 @@ def home(request):
                                 sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
                                 skor = "-"
                             else:
-                                sentimen = f"Error Server HF (Backend): {err_msg}"
+                                sentimen = f"Error Server HF (Backend Bypass): {err_msg}"
                                 skor = "-"
                         elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
                             scores = result[0]
@@ -156,13 +173,13 @@ def home(request):
                                 sentimen = "Negatif"
                                 confidence = prob_negatif
                                 
-                            skor = "HuggingFace API (Backend Fallback)"
+                            skor = "HuggingFace API (Ultimate Backend Fallback)"
                             metrik = context['base_metrik_indobert']
                         else:
                             sentimen = f"Error: Format API tidak sesuai ({result_str[:50]})"
                             skor = "-"
                 except Exception as e:
-                    sentimen = f"Error: Javascript Browser Gagal Mengirim Hasil (Silakan Hard Refresh/Bersihkan Cache Browser)"
+                    sentimen = f"Error Kritis Vercel (Semua Jalur Gagal): {str(e)}"
                     skor = "-"
 
         # --- GENERATE KESIMPULAN ---

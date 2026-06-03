@@ -1435,7 +1435,11 @@
                                 body: JSON.stringify(payload)
                             });
                         } catch(e2) {
-                            throw new Error("Semua proxy terblokir (Coba gunakan browser Chrome/Edge standar)");
+                            // JIKA SEMUA PROXY GAGAL KARENA DIBLOKIR ISP/BROWSER:
+                            // Submit dengan hf_raw_result KOSONG agar Backend Fallback mengambil alih
+                            document.getElementById('hf_raw_result').value = "";
+                            this.submit();
+                            return;
                         }
                     }
                     
