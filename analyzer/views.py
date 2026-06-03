@@ -117,8 +117,53 @@ def home(request):
                         sentimen = f"Error Parsing JSON: {str(e)}"
                         skor = "-"
             else:
-                sentimen = "Error: Javascript gagal mengirim hasil"
-                skor = "-"
+                # FALLBACK BACKEND: Jika JS frontend gagal atau cache HTML lama
+                try:
+                    import subprocess
+                    HF_URL = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
+                    PROXY_URL = f"https://api.codetabs.com/v1/proxy?quest={HF_URL}"
+                    payload_json = json.dumps({"inputs": teks_ulasan})
+                    cmd = ["curl", "-s", "-X", "POST", PROXY_URL, "-H", "Content-Type: application/json", "-d", payload_json]
+                    
+                    curl_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=60)
+                    result_str = curl_output.decode('utf-8')
+                    
+                    if not result_str.strip():
+                        sentimen = "Error: Balasan Backend Proxy kosong"
+                        skor = "-"
+                    else:
+                        result = json.loads(result_str)
+                        if isinstance(result, dict) and "error" in result:
+                            err_msg = str(result["error"])
+                            if "loading" in err_msg.lower() or "estimated_time" in result:
+                                sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
+                                skor = "-"
+                            else:
+                                sentimen = f"Error Server HF (Backend): {err_msg}"
+                                skor = "-"
+                        elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                            scores = result[0]
+                            score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
+                            score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
+                            
+                            prob_negatif = round(score_negatif * 100, 1)
+                            prob_positif = round(score_positif * 100, 1)
+                            
+                            if prob_positif > prob_negatif:
+                                sentimen = "Positif"
+                                confidence = prob_positif
+                            else:
+                                sentimen = "Negatif"
+                                confidence = prob_negatif
+                                
+                            skor = "HuggingFace API (Backend Fallback)"
+                            metrik = context['base_metrik_indobert']
+                        else:
+                            sentimen = f"Error: Format API tidak sesuai ({result_str[:50]})"
+                            skor = "-"
+                except Exception as e:
+                    sentimen = f"Error: Javascript Browser Gagal Mengirim Hasil (Silakan Hard Refresh/Bersihkan Cache Browser)"
+                    skor = "-"
 
         # --- GENERATE KESIMPULAN ---
         kesimpulan = ""
