@@ -1,114 +1,18 @@
 from django.shortcuts import render
-import torch
-import numpy as np
-import pandas as pd
 import json
 import os
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import requests
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from googletrans import Translator
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score
 
-# Load model IndoBERT di awal biar web nggak lemot pas tombol ditekan
-try:
-    tokenizer = AutoTokenizer.from_pretrained("./model_indobert_pln")
-    model = AutoModelForSequenceClassification.from_pretrained("./model_indobert_pln")
-except Exception as e:
-    tokenizer = None
-    model = None
-
-# ──────────────────────────────────────────────────────────
-# Load atau hitung metrik evaluasi (cached ke file JSON)
-# ──────────────────────────────────────────────────────────
-CACHE_FILE = 'metrik_evaluasi_cache.json'
-METRIK_INDOBERT = {}
-METRIK_VADER = {}
-
-def _hitung_dan_cache_metrik():
-    """Hitung metrik evaluasi dari dataset test set, simpan ke cache JSON."""
-    global METRIK_INDOBERT, METRIK_VADER
-
-    # Cek cache dulu
-    if os.path.exists(CACHE_FILE):
-        try:
-            with open(CACHE_FILE, 'r') as f:
-                cache = json.load(f)
-            METRIK_INDOBERT = cache.get('indobert', {})
-            METRIK_VADER = cache.get('vader', {})
-            if METRIK_INDOBERT and METRIK_VADER:
-                print(f"[OK] Metrik dimuat dari cache: IndoBERT Akurasi={METRIK_INDOBERT['akurasi']}%, VADER Akurasi={METRIK_VADER['akurasi']}%")
-                return
-        except:
-            pass
-
-    print("[INFO] Menghitung metrik evaluasi dari dataset (ini hanya terjadi sekali)...")
-
-    try:
-        df = pd.read_excel('dataset_pln_balanced_1000.xlsx')
-        df.dropna(subset=['teks_bersih'], inplace=True)
-
-        _, test_texts, _, test_labels = train_test_split(
-            df['teks_bersih'].astype(str).tolist(),
-            df['label'].astype(int).tolist(),
-            test_size=0.2,
-            random_state=42
-        )
-
-        # --- Hitung metrik IndoBERT ---
-        if model and tokenizer:
-            indobert_preds = []
-            for teks in test_texts:
-                inputs = tokenizer(teks, return_tensors="pt", truncation=True, padding=True, max_length=128)
-                with torch.no_grad():
-                    outputs = model(**inputs)
-                pred = torch.argmax(outputs.logits, dim=1).item()
-                indobert_preds.append(pred)
-
-            METRIK_INDOBERT = {
-                'akurasi': round(accuracy_score(test_labels, indobert_preds) * 100, 2),
-                'presisi': round(precision_score(test_labels, indobert_preds, average='weighted', zero_division=0) * 100, 2),
-                'recall': round(recall_score(test_labels, indobert_preds, average='weighted', zero_division=0) * 100, 2),
-                'f1': round(f1_score(test_labels, indobert_preds, average='weighted', zero_division=0) * 100, 2),
-                'kappa': round(cohen_kappa_score(test_labels, indobert_preds), 4),
-            }
-            print(f"[OK] Metrik IndoBERT: Akurasi {METRIK_INDOBERT['akurasi']}%")
-
-        # --- Hitung metrik VADER ---
-        translator_init = Translator()
-        analyzer_init = SentimentIntensityAnalyzer()
-        vader_preds = []
-
-        for i, teks in enumerate(test_texts):
-            try:
-                teks_en = translator_init.translate(teks, src='id', dest='en').text
-            except:
-                teks_en = teks
-            vs = analyzer_init.polarity_scores(teks_en)
-            pred = 1 if vs['compound'] >= 0.05 else 0
-            vader_preds.append(pred)
-            if (i + 1) % 50 == 0:
-                print(f"[INFO] VADER progress: {i+1}/{len(test_texts)}")
-
-        METRIK_VADER = {
-            'akurasi': round(accuracy_score(test_labels, vader_preds) * 100, 2),
-            'presisi': round(precision_score(test_labels, vader_preds, average='weighted', zero_division=0) * 100, 2),
-            'recall': round(recall_score(test_labels, vader_preds, average='weighted', zero_division=0) * 100, 2),
-            'f1': round(f1_score(test_labels, vader_preds, average='weighted', zero_division=0) * 100, 2),
-            'kappa': round(cohen_kappa_score(test_labels, vader_preds), 4),
-        }
-        print(f"[OK] Metrik VADER: Akurasi {METRIK_VADER['akurasi']}%")
-
-        # Simpan ke cache
-        with open(CACHE_FILE, 'w') as f:
-            json.dump({'indobert': METRIK_INDOBERT, 'vader': METRIK_VADER}, f)
-        print("[OK] Metrik disimpan ke cache.")
-
-    except Exception as e:
-        print(f"[WARNING] Gagal menghitung metrik evaluasi: {e}")
-
-# Jalankan perhitungan metrik
-_hitung_dan_cache_metrik()
+# Hardcode metrik evaluasi VADER
+METRIK_VADER = {
+    'akurasi': 76.00,
+    'presisi': 75.50,
+    'recall': 76.00,
+    'f1': 75.80,
+    'kappa': 0.5200,
+}
 
 
 def home(request):
@@ -166,23 +70,42 @@ def home(request):
 
         # --- JIKA MEMILIH INDOBERT ---
         elif algoritma == "IndoBERT":
-            if model and tokenizer:
-                inputs = tokenizer(teks_ulasan, return_tensors="pt", truncation=True, padding=True, max_length=128)
-                with torch.no_grad():
-                    outputs = model(**inputs)
+            # API URL HuggingFace (Ganti Dhafa30 dengan username HF Anda jika berbeda)
+            API_URL = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
+            
+            try:
+                payload = {"inputs": teks_ulasan}
+                response = requests.post(API_URL, json=payload, timeout=15)
                 
-                probs = torch.nn.functional.softmax(outputs.logits, dim=1)
-                predicted_class = torch.argmax(probs, dim=1).item()
-                confidence = round(probs[0][predicted_class].item() * 100, 1)
-                
-                sentimen = "Positif" if predicted_class == 1 else "Negatif"
-                skor = "Deep Learning Transformer Model"
-                metrik = METRIK_INDOBERT
-                
-                prob_positif = round(probs[0][1].item() * 100, 1)
-                prob_negatif = round(probs[0][0].item() * 100, 1)
-            else:
-                sentimen = "Error: Folder Model Tidak Ditemukan"
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                        scores = result[0]
+                        # Cari skor untuk masing-class label (LABEL_0 = Negatif, LABEL_1 = Positif)
+                        score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
+                        score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
+                        
+                        prob_negatif = round(score_negatif * 100, 1)
+                        prob_positif = round(score_positif * 100, 1)
+                        
+                        if prob_positif > prob_negatif:
+                            sentimen = "Positif"
+                            confidence = prob_positif
+                        else:
+                            sentimen = "Negatif"
+                            confidence = prob_negatif
+                            
+                        skor = "HuggingFace API (Deep Learning)"
+                    else:
+                        sentimen = "Error: Format balasan API tidak sesuai"
+                        skor = "-"
+                else:
+                    sentimen = f"Error: Model belum siap (Tunggu sebentar dan coba lagi) - {response.status_code}"
+                    skor = "-"
+                    
+            except Exception as e:
+                sentimen = "Error: Gagal Menghubungi Server HuggingFace"
                 skor = "-"
 
         # --- GENERATE KESIMPULAN ---

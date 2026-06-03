@@ -1,8 +1,4 @@
 Django>=4.0
-torch
-transformers
 vaderSentiment
 googletrans==4.0.0-rc1
-pandas
-scikit-learn
-openpyxl
+requests
