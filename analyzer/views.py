@@ -1,7 +1,8 @@
 from django.shortcuts import render
 import json
 import os
-import requests
+import urllib.request
+import urllib.error
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from googletrans import Translator
 
@@ -70,43 +71,45 @@ def home(request):
 
         # --- JIKA MEMILIH INDOBERT ---
         elif algoritma == "IndoBERT":
-            # API URL HuggingFace (Ganti Dhafa30 dengan username HF Anda jika berbeda)
             API_URL = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
             
             try:
-                payload = {"inputs": teks_ulasan}
-                response = requests.post(API_URL, json=payload, timeout=60)
+                payload = json.dumps({"inputs": teks_ulasan}).encode('utf-8')
+                req = urllib.request.Request(API_URL, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
                 
-                if response.status_code == 200:
-                    result = response.json()
-                    
-                    if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-                        scores = result[0]
-                        # Cari skor untuk masing-class label (LABEL_0 = Negatif, LABEL_1 = Positif)
-                        score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
-                        score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
+                try:
+                    with urllib.request.urlopen(req, timeout=60) as response:
+                        result = json.loads(response.read().decode('utf-8'))
                         
-                        prob_negatif = round(score_negatif * 100, 1)
-                        prob_positif = round(score_positif * 100, 1)
-                        
-                        if prob_positif > prob_negatif:
-                            sentimen = "Positif"
-                            confidence = prob_positif
-                        else:
-                            sentimen = "Negatif"
-                            confidence = prob_negatif
+                        if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                            scores = result[0]
+                            score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
+                            score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
                             
-                        skor = "HuggingFace API (Deep Learning)"
-                        metrik = context['base_metrik_indobert']
-                    else:
-                        sentimen = "Error: Format balasan API tidak sesuai"
-                        skor = "-"
-                else:
-                    sentimen = f"Error: Model belum siap (Tunggu 20 detik dan coba lagi) - {response.status_code}"
+                            prob_negatif = round(score_negatif * 100, 1)
+                            prob_positif = round(score_positif * 100, 1)
+                            
+                            if prob_positif > prob_negatif:
+                                sentimen = "Positif"
+                                confidence = prob_positif
+                            else:
+                                sentimen = "Negatif"
+                                confidence = prob_negatif
+                                
+                            skor = "HuggingFace API (Deep Learning)"
+                            metrik = context['base_metrik_indobert']
+                        else:
+                            sentimen = "Error: Format balasan API tidak sesuai"
+                            skor = "-"
+                except urllib.error.HTTPError as e:
+                    sentimen = f"Error: Model sedang loading (Tunggu 20 detik lalu klik lagi) - HTTP {e.code}"
+                    skor = "-"
+                except urllib.error.URLError as e:
+                    sentimen = f"Error Jaringan Vercel: {e.reason}"
                     skor = "-"
                     
             except Exception as e:
-                sentimen = f"Error: Gagal Menghubungi Server HF ({str(e)})"
+                sentimen = f"Error Keseluruhan: {str(e)}"
                 skor = "-"
 
         # --- GENERATE KESIMPULAN ---
