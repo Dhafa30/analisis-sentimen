@@ -71,63 +71,53 @@ def home(request):
 
         # --- JIKA MEMILIH INDOBERT ---
         elif algoritma == "IndoBERT":
-            try:
-                import subprocess
-                import urllib.parse
-                
-                # Gunakan Public Proxy API untuk membypass pemblokiran DNS Vercel terhadap domain HuggingFace
-                HF_URL = "https://api-inference.huggingface.co/models/Dhafa30/model_indobert_pln"
-                
-                # Menggunakan corsproxy.io di level Backend (karena AdBlocker Browser memblokirnya jika di Frontend)
-                PROXY_URL = "https://corsproxy.io/?" + urllib.parse.quote(HF_URL, safe='')
-                
-                payload_json = json.dumps({"inputs": teks_ulasan})
-                
-                cmd = [
-                    "curl", "-s", "-X", "POST", PROXY_URL,
-                    "-H", "Content-Type: application/json",
-                    "-d", payload_json
-                ]
-                
-                curl_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=60)
-                result_str = curl_output.decode('utf-8')
-                
-                if not result_str.strip():
-                    sentimen = "Error: Balasan API kosong"
+            hf_raw_result = request.POST.get('hf_raw_result', '')
+            if hf_raw_result:
+                if hf_raw_result.startswith('HTTP_ERROR_'):
+                    status = hf_raw_result.split('_')[-1]
+                    if status == "503":
+                        sentimen = f"Error: Model sedang loading di server (Tunggu 20 detik lalu klik lagi) - HTTP 503"
+                    else:
+                        sentimen = f"Error HuggingFace API - HTTP {status}"
+                    skor = "-"
+                elif hf_raw_result.startswith('FETCH_ERROR_'):
+                    err_msg = hf_raw_result.replace('FETCH_ERROR_', '')
+                    sentimen = f"Error Jaringan Browser: {err_msg}"
                     skor = "-"
                 else:
-                    result = json.loads(result_str)
-                    
-                    if isinstance(result, dict) and "error" in result:
-                        err_msg = str(result["error"])
-                        if "loading" in err_msg.lower() or "estimated_time" in result:
-                            sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
-                            skor = "-"
-                        else:
-                            sentimen = f"Error Server HF: {err_msg}"
-                            skor = "-"
-                    elif isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-                        scores = result[0]
-                        score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
-                        score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
-                        
-                        prob_negatif = round(score_negatif * 100, 1)
-                        prob_positif = round(score_positif * 100, 1)
-                        
-                        if prob_positif > prob_negatif:
-                            sentimen = "Positif"
-                            confidence = prob_positif
-                        else:
-                            sentimen = "Negatif"
-                            confidence = prob_negatif
+                    try:
+                        result = json.loads(hf_raw_result)
+                        if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                            scores = result[0]
+                            score_negatif = next((item['score'] for item in scores if item['label'] == 'LABEL_0'), 0.0)
+                            score_positif = next((item['score'] for item in scores if item['label'] == 'LABEL_1'), 0.0)
                             
-                        skor = "HuggingFace API (Backend Proxy)"
-                        metrik = context['base_metrik_indobert']
-                    else:
-                        sentimen = f"Error: Format balasan API tidak sesuai ({result_str[:50]})"
+                            prob_negatif = round(score_negatif * 100, 1)
+                            prob_positif = round(score_positif * 100, 1)
+                            
+                            if prob_positif > prob_negatif:
+                                sentimen = "Positif"
+                                confidence = prob_positif
+                            else:
+                                sentimen = "Negatif"
+                                confidence = prob_negatif
+                                
+                            skor = "HuggingFace API (via Browser Proxy)"
+                            metrik = context['base_metrik_indobert']
+                        elif isinstance(result, dict) and "error" in result:
+                            if "loading" in str(result["error"]).lower() or "estimated_time" in result:
+                                sentimen = "Error: Model sedang loading di server HF (Tunggu 20 detik lalu coba lagi)"
+                            else:
+                                sentimen = f"Error Server HF: {result['error']}"
+                            skor = "-"
+                        else:
+                            sentimen = f"Error: Format balasan API tidak sesuai ({hf_raw_result[:50]})"
+                            skor = "-"
+                    except Exception as e:
+                        sentimen = f"Error Parsing JSON: {str(e)}"
                         skor = "-"
-            except Exception as e:
-                sentimen = f"Error Proxy Vercel: {str(e)}"
+            else:
+                sentimen = "Error: Javascript gagal mengirim hasil"
                 skor = "-"
 
         # --- GENERATE KESIMPULAN ---
