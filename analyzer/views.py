@@ -75,7 +75,7 @@ def home(request):
             
             try:
                 payload = {"inputs": teks_ulasan}
-                response = requests.post(API_URL, json=payload, timeout=15)
+                response = requests.post(API_URL, json=payload, timeout=60)
                 
                 if response.status_code == 200:
                     result = response.json()
@@ -97,15 +97,16 @@ def home(request):
                             confidence = prob_negatif
                             
                         skor = "HuggingFace API (Deep Learning)"
+                        metrik = context['base_metrik_indobert']
                     else:
                         sentimen = "Error: Format balasan API tidak sesuai"
                         skor = "-"
                 else:
-                    sentimen = f"Error: Model belum siap (Tunggu sebentar dan coba lagi) - {response.status_code}"
+                    sentimen = f"Error: Model belum siap (Tunggu 20 detik dan coba lagi) - {response.status_code}"
                     skor = "-"
                     
             except Exception as e:
-                sentimen = "Error: Gagal Menghubungi Server HuggingFace"
+                sentimen = f"Error: Gagal Menghubungi Server HF ({str(e)})"
                 skor = "-"
 
         # --- GENERATE KESIMPULAN ---
