@@ -1,0 +1,1496 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Analisis sentimen ulasan PLN Mobile menggunakan IndoBERT dan VADER">
+    <title>Analisis Sentimen PLN Mobile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ─── Reset & Base ─── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            background: #070b1a;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ─── Animated Mesh Background ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(0, 102, 204, 0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 180, 216, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 60% 80%, rgba(255, 193, 7, 0.08) 0%, transparent 50%);
+            z-index: 0;
+            animation: meshShift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshShift {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* ─── Grid Pattern Overlay ─── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+        }
+
+        /* ─── Floating Orbs ─── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            animation: orbFloat 20s ease-in-out infinite alternate;
+        }
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: rgba(0, 102, 204, 0.12);
+            top: -100px; left: -100px;
+            animation-duration: 18s;
+        }
+        .orb-2 {
+            width: 350px; height: 350px;
+            background: rgba(255, 193, 7, 0.08);
+            bottom: -80px; right: -60px;
+            animation-duration: 22s;
+            animation-delay: -5s;
+        }
+        .orb-3 {
+            width: 250px; height: 250px;
+            background: rgba(0, 180, 216, 0.1);
+            top: 50%; left: 60%;
+            animation-duration: 15s;
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+            100% { transform: translate(10px, -10px) scale(1.05); }
+        }
+
+        /* ─── Floating Lightning Particles ─── */
+        .particles-container {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 180, 216, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(0, 180, 216, 0.4);
+            animation: particleRise linear infinite;
+        }
+
+        @keyframes particleRise {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ─── Main Container ─── */
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1140px;
+        }
+
+        /* ─── Glassmorphism Card ─── */
+        .container {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            padding: 44px 36px 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow:
+                0 24px 80px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            animation: cardIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Card shimmer line */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.4), rgba(255, 193, 7, 0.3), transparent);
+        }
+
+        /* Subtle glow behind card */
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 0%, rgba(0, 102, 204, 0.06) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(40px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ─── Logo Section ─── */
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        @media (min-width: 768px) {
+            .logo-section {
+                flex-direction: row;
+                justify-content: center;
+                gap: 24px;
+                margin-bottom: 36px;
+            }
+            .title-group {
+                text-align: left;
+            }
+            .logo-glow {
+                margin-bottom: 0;
+            }
+        }
+
+        .logo-glow {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+        }
+
+        .logo-glow::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            background: radial-gradient(circle, rgba(0, 102, 204, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .logo-glow img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 20px rgba(0, 102, 204, 0.3));
+        }
+
+        /* ─── Title ─── */
+        .title-group {
+            text-align: center;
+        }
+
+        .title-group h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4db8ff 0%, #0099ff 30%, #ffc107 70%, #ffab00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .title-group .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(0, 153, 255, 0.1);
+            border: 1px solid rgba(0, 153, 255, 0.2);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4db8ff;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 10px;
+        }
+
+        .title-group .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #00cc88;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0, 204, 136, 0.6);
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.45);
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        /* ─── Divider ─── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            margin: 24px 0 32px 0;
+        }
+
+        /* ─── Layout Grid ─── */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+                align-items: start;
+            }
+            .content-grid.has-result {
+                grid-template-columns: 1fr 1.2fr 1fr;
+            }
+            .empty-state-wrapper {
+                grid-column: 2 / 3;
+            }
+        }
+
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 250px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.95rem;
+            text-align: center;
+            padding: 30px;
+            animation: resultIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        /* ─── Labels ─── */
+        label {
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.65);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+
+        label .icon {
+            font-size: 0.9rem;
+        }
+
+        /* ─── Form Controls ─── */
+        textarea, select {
+            width: 100%;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        textarea::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        textarea:focus, select:focus {
+            border-color: #00b4d8;
+            box-shadow:
+                0 0 0 4px rgba(0, 180, 216, 0.15),
+                0 10px 20px rgba(0, 180, 216, 0.1) inset;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #111827;
+            color: #f0f0f0;
+            padding: 8px;
+        }
+
+        /* ─── Submit Button ─── */
+        .btn-submit {
+            background: linear-gradient(135deg, #0066cc 0%, #0099ff 50%, #00b4d8 100%);
+            color: white;
+            border: none;
+            padding: 15px 24px;
+            margin-top: 4px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            width: 100%;
+            letter-spacing: 0.02em;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 200%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 30px rgba(0, 102, 204, 0.4),
+                0 0 60px rgba(0, 153, 255, 0.1);
+        }
+
+        .btn-submit:hover::before { left: 100%; }
+        .btn-submit:active { transform: translateY(0) scale(0.98); }
+
+        .btn-icon {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-submit:hover .btn-icon {
+            transform: translateX(3px);
+        }
+
+        /* ─── Reset Button ─── */
+        .btn-reset {
+            background: rgba(255, 76, 76, 0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 76, 76, 0.3);
+            padding: 15px 24px;
+            margin-top: 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: 100%;
+            letter-spacing: 0.02em;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 76, 76, 0.2);
+            border-color: rgba(255, 76, 76, 0.5);
+            color: #ff4c4c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 76, 76, 0.15);
+        }
+
+        .btn-reset:active { transform: translateY(0) scale(0.98); }
+
+        /* ─── Algorithm Chips ─── */
+        .algo-info {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .algo-chip {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .algo-chip::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            transform: skewX(-20deg);
+            transition: 0.5s;
+        }
+
+        .algo-chip:hover::before {
+            left: 150%;
+        }
+
+        .algo-chip:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .algo-chip.selected {
+            background: linear-gradient(135deg, rgba(0, 153, 255, 0.15), rgba(0, 180, 216, 0.05));
+            border-color: #0099ff;
+            color: #ffffff;
+            box-shadow: 0 8px 32px rgba(0, 153, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .algo-chip .chip-icon {
+            font-size: 1.4rem;
+            transition: transform 0.3s ease;
+        }
+
+        .algo-chip:hover .chip-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .algo-chip strong {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* ─── Result Card ─── */
+        .result {
+            margin-top: 0;
+            padding: 24px 28px;
+            background: linear-gradient(145deg, rgba(0, 204, 136, 0.08), rgba(0, 204, 136, 0.02));
+            border: 1px solid rgba(0, 204, 136, 0.2);
+            text-align: left;
+            border-radius: 18px;
+            animation: resultIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 204, 136, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .result:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 50px rgba(0, 204, 136, 0.18);
+        }
+
+        .result::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, #00cc88, #00b4d8);
+            border-radius: 6px 0 0 6px;
+        }
+
+        /* ─── Result Card — Negatif ─── */
+        .result.negatif {
+            background: linear-gradient(145deg, rgba(255, 76, 76, 0.08), rgba(255, 76, 76, 0.02));
+            border: 1px solid rgba(255, 76, 76, 0.2);
+            box-shadow: 0 12px 40px rgba(255, 76, 76, 0.12);
+        }
+        
+        .result.negatif:hover {
+            box-shadow: 0 16px 50px rgba(255, 76, 76, 0.18);
+        }
+
+        .result.negatif::before {
+            background: linear-gradient(180deg, #ff4c4c, #ff6b6b);
+        }
+
+        @keyframes resultIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .result-header .result-icon {
+            font-size: 1.3rem;
+        }
+
+        .result h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .result-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .result-item .item-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .result-item .item-value {
+            font-size: 0.85rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .result-item .item-value.positif {
+            color: #00e68a;
+        }
+
+        .result-item .item-value.negatif-text {
+            color: #ff6b6b;
+        }
+
+        .result-item .item-value.netral {
+            color: #ffc107;
+        }
+
+        /* ─── Sentiment Badge ─── */
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .sentiment-badge.positif {
+            background: linear-gradient(135deg, rgba(0, 230, 138, 0.2), rgba(0, 204, 136, 0.1));
+            color: #00e68a;
+            border: 1px solid rgba(0, 204, 136, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 230, 138, 0.2);
+        }
+
+        .sentiment-badge.negatif-badge {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 76, 76, 0.1));
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 76, 76, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.2);
+        }
+
+        .sentiment-badge.netral-badge {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.1));
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+        }
+        
+        /* ─── Speedometer Conclusion ─── */
+        .speedometer-conclusion {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            border-left: 4px solid #4db8ff;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            text-align: left;
+            animation: resultIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+        
+        .speedometer-conclusion:hover {
+            transform: translateY(-2px);
+        }
+
+        .speedometer-conclusion.pos {
+            border-left-color: #00e68a;
+            background: linear-gradient(90deg, rgba(0, 230, 138, 0.08), rgba(0, 230, 138, 0.02));
+        }
+
+        .speedometer-conclusion.neg {
+            border-left-color: #ff6b6b;
+            background: linear-gradient(90deg, rgba(255, 107, 107, 0.08), rgba(255, 107, 107, 0.02));
+        }
+
+        /* ─── Speedometer UI ─── */
+        .speedometer-container {
+            margin-top: 0;
+            height: 100%;
+            padding: 24px 20px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .speedometer-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .gauge-wrapper {
+            position: relative;
+            width: 220px;
+            height: 110px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .gauge-bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 270deg,
+                #ff4c4c 0%,
+                #ff4c4c calc(var(--neg-pct) * 0.5%),
+                #00e68a calc(var(--neg-pct) * 0.5%),
+                #00e68a 50%,
+                transparent 50%
+            );
+            /* default state for animation */
+            --neg-pct: 50; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5) inset;
+        }
+
+        .gauge-inner {
+            position: absolute;
+            top: 20px; left: 20px;
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0d1222, #141c33); /* depth */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            z-index: 1;
+        }
+
+        .gauge-needle {
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 6px; height: 95px;
+            background: linear-gradient(to top, #ffffff, #e0e0e0);
+            border-radius: 4px;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(calc((var(--neg-pct) * 1.8deg) - 90deg));
+            z-index: 2;
+            transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy effect */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .gauge-needle::after {
+            content: '';
+            position: absolute;
+            bottom: -8px; left: 50%;
+            transform: translateX(-50%);
+            width: 20px; height: 20px;
+            background: radial-gradient(circle, #ffffff, #cccccc);
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .lbl-neg { color: #ff6b6b; display: flex; flex-direction: column; align-items: flex-start; }
+        .lbl-pos { color: #00e68a; display: flex; flex-direction: column; align-items: flex-end; }
+        .lbl-val { font-size: 1.3rem; font-weight: 800; margin-top: 4px; }
+
+        /* ─── Confidence Bar ─── */
+        .confidence-section {
+            margin-top: 14px;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .confidence-label .conf-text {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .confidence-label .conf-value {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #4db8ff;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #0066cc, #00b4d8, #00e68a);
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+
+        .confidence-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            filter: blur(4px);
+            animation: barGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes barGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .result.negatif .confidence-fill {
+            background: linear-gradient(90deg, #cc3333, #ff6b6b, #ff9999);
+        }
+
+        .result.negatif .confidence-label .conf-value {
+            color: #ff6b6b;
+        }
+
+        /* ─── Metrics Section ─── */
+        .metrics-section {
+            margin-top: 20px;
+            animation: resultIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+        }
+
+        .metrics-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metrics-title .mt-icon {
+            font-size: 1rem;
+        }
+
+        .metrics-title .mt-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .metric-card {
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+        }
+
+        .metric-card .metric-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4db8ff, #00e68a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .metric-card .metric-unit {
+            font-size: 0.75rem;
+            font-weight: 700;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-card .metric-name {
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.45);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        .metric-card.kappa-card {
+            grid-column: 1 / -1;
+        }
+
+        .metric-card.kappa-card .metric-value {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .result.negatif .metric-card .metric-value {
+            background: linear-gradient(135deg, #ff6b6b, #ffc107);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        /* ─── Footer ─── */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.03em;
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 480px) {
+            body { padding: 20px 12px; }
+            .container { padding: 32px 20px 28px; border-radius: 20px; }
+            .title-group h2 { font-size: 1.35rem; }
+            .logo-glow { width: 64px; height: 64px; }
+            .logo-glow img { width: 64px; height: 64px; }
+            .algo-info { flex-direction: column; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ─── Loading state ─── */
+        .btn-submit.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-submit.loading .btn-text {
+            opacity: 0;
+        }
+
+        .btn-submit.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* ─── Modal ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: #0f1629;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 24px 50px rgba(0,0,0,0.5);
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .modal-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #f0f0f0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .model-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .model-stats {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .ms-title {
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #4db8ff;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 8px;
+        }
+
+        .ms-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .ms-row strong {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles-container" id="particles"></div>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <!-- Logo & Title -->
+            <div class="logo-section">
+                <div class="logo-glow">
+                    <img src="{% static 'images/pln_logo.png' %}" alt="Logo PLN">
+                </div>
+                <div class="title-group">
+                    <h2>Analisis Sentimen<br>PLN Mobile</h2>
+                    <span class="badge">⚡ Machine Learning</span>
+                    <p class="subtitle">Bandingkan performa Lexicon vs Deep Learning</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="content-grid {% if sentimen %}has-result{% endif %}">
+                <!-- Form Column -->
+                <div class="input-section">
+                    <form method="POST" id="sentimentForm">
+                        {% csrf_token %}
+                        
+                        <!-- Hidden input untuk menyimpan pilihan algoritma -->
+                        <input type="hidden" name="algoritma" id="algoritma_input" value="{% if algoritma %}{{ algoritma }}{% else %}IndoBERT{% endif %}">
+                        
+                        <label>
+                            <span class="icon">⚙️</span> Pilih Algoritma
+                        </label>
+
+                        <!-- Algorithm Info Chips as selectable buttons -->
+                        <div class="algo-info" id="algo-selection">
+                            <div class="algo-chip {% if algoritma == 'IndoBERT' or not algoritma %}selected{% endif %}" data-value="IndoBERT" style="padding-right: 44px; position: relative;">
+                                <span class="chip-icon">🧠</span>
+                                <div>
+                                    <strong>IndoBERT</strong><br>
+                                    Deep Learning
+                                </div>
+                                <button type="button" id="btnInfoModelIndoBERT" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffc107; cursor: pointer; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" title="Lihat performa asli model IndoBERT">!</button>
+                            </div>
+                            <div class="algo-chip {% if algoritma == 'VADER' %}selected{% endif %}" data-value="VADER" style="padding-right: 44px; position: relative;">
+                                <span class="chip-icon">📊</span>
+                                <div>
+                                    <strong>VADER</strong><br>
+                                    Lexicon-Based
+                                </div>
+                                <button type="button" id="btnInfoModelVADER" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffc107; cursor: pointer; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" title="Lihat performa asli model VADER">!</button>
+                            </div>
+                        </div>
+
+                        <label for="teks_ulasan">
+                            <span class="icon">✍️</span> Teks Ulasan
+                        </label>
+                        <textarea name="teks_ulasan" id="teks_ulasan" rows="6" placeholder="Contoh: Aplikasi ini sering error saat beli token..." required>{{ teks_input }}</textarea>
+
+                        <button type="submit" class="btn-submit" id="btnSubmit">
+                            <span class="btn-text">Analisis Sentimen</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+
+                        <a href="/" class="btn-reset" id="btnReset">
+                            <span class="btn-icon">🔄</span>
+                            <span class="btn-text">Reset</span>
+                        </a>
+                    </form>
+                </div>
+
+                {% if sentimen %}
+                <!-- Result Column -->
+                <div class="result-section">
+                    <div class="result {% if sentimen == 'Negatif' %}negatif{% endif %}">
+                        <div class="result-header">
+                            <span class="result-icon">{% if sentimen == 'Positif' %}✅{% elif sentimen == 'Negatif' %}❌{% else %}⚠️{% endif %}</span>
+                            <h3>Hasil Klasifikasi</h3>
+                        </div>
+                        <div class="result-body">
+                            <div class="result-item">
+                                <span class="item-label">Model</span>
+                                <span class="item-value">{{ algoritma }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="item-label">Sentimen</span>
+                                <span class="sentiment-badge {% if sentimen == 'Positif' %}positif{% elif sentimen == 'Negatif' %}negatif-badge{% else %}netral-badge{% endif %}">
+                                    {% if sentimen == 'Positif' %}↑{% elif sentimen == 'Negatif' %}↓{% else %}→{% endif %}
+                                    {{ sentimen }}
+                                </span>
+                            </div>
+
+                            {% if teks_terjemahan %}
+                            <div class="result-item">
+                                <span class="item-label">Teks Terjemahan</span>
+                                <span class="item-value" style="font-size: 0.78rem; font-style: italic; font-weight: 400; color: rgba(255,255,255,0.6); max-width: 60%; text-align: right; line-height: 1.4;">{{ teks_terjemahan }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Metrics Section -->
+                    {% if akurasi != '-' %}
+                    <div class="metrics-section">
+                        <div class="metrics-title">
+                            <span class="mt-icon">📊</span>
+                            Performa Prediksi & Evaluasi Model
+                            <span class="mt-line"></span>
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-value">{{ confidence }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Akurasi (Keyakinan)</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ presisi }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Presisi</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ recall }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Recall</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ f1 }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">F1-Score</div>
+                            </div>
+                            <div class="metric-card kappa-card">
+                                <div class="metric-value">{{ kappa }}</div>
+                                <div class="metric-name">Cohen's Kappa</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Speedometer Column -->
+                <div class="speedometer-section">
+                    <div class="speedometer-container">
+                        <div class="speedometer-title">
+                            <span>⏱️</span> Persentase Sentimen
+                        </div>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-bg" style="--neg-pct: 50;" data-neg="{{ prob_negatif }}"></div>
+                            <div class="gauge-inner"></div>
+                            <div class="gauge-needle" style="--neg-pct: 50;" data-neg="{{ prob_negatif }}"></div>
+                        </div>
+                        <div class="gauge-labels">
+                            <div class="lbl-neg">
+                                <span>Negatif</span>
+                                <span class="lbl-val">{{ prob_negatif|default:0 }}%</span>
+                            </div>
+                            <div class="lbl-pos">
+                                <span>Positif</span>
+                                <span class="lbl-val">{{ prob_positif|default:0 }}%</span>
+                            </div>
+                        </div>
+                        
+                        {% if kesimpulan %}
+                        <div class="speedometer-conclusion {% if sentimen == 'Positif' %}pos{% elif sentimen == 'Negatif' %}neg{% endif %}">
+                            <span style="font-weight: 700; display: block; margin-bottom: 6px; font-style: normal; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7;">💡 Kesimpulan Analisis</span>
+                            {{ kesimpulan }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="result-section empty-state-wrapper">
+                    <div class="empty-state">
+                        <div>
+                            <div style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5;">🔍</div>
+                            Silakan masukkan teks ulasan dan pilih algoritma untuk melihat hasil analisis sentimen di sini.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            </div>
+
+            <div class="footer">
+                © 2026 PLN Mobile Sentiment Analyzer • Powered by IndoBERT & VADER
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Performa Model -->
+    <div id="modelModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 Performa Base Model</h3>
+                <button type="button" id="closeModal" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="model-comparison" id="modelComparison">
+                    <!-- IndoBERT -->
+                    <div class="model-stats" id="statsIndoBERT">
+                        <div class="ms-title">🧠 IndoBERT</div>
+                        <div class="ms-row"><span>Akurasi:</span> <strong>{{ base_metrik_indobert.akurasi|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>Presisi:</span> <strong>{{ base_metrik_indobert.presisi|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>Recall:</span> <strong>{{ base_metrik_indobert.recall|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>F1-Score:</span> <strong>{{ base_metrik_indobert.f1|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>Kappa:</span> <strong>{{ base_metrik_indobert.kappa|default:"-" }}</strong></div>
+                    </div>
+                    <!-- VADER -->
+                    <div class="model-stats" id="statsVADER">
+                        <div class="ms-title">📊 VADER</div>
+                        <div class="ms-row"><span>Akurasi:</span> <strong>{{ base_metrik_vader.akurasi|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>Presisi:</span> <strong>{{ base_metrik_vader.presisi|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>Recall:</span> <strong>{{ base_metrik_vader.recall|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>F1-Score:</span> <strong>{{ base_metrik_vader.f1|default:"-" }}%</strong></div>
+                        <div class="ms-row"><span>Kappa:</span> <strong>{{ base_metrik_vader.kappa|default:"-" }}</strong></div>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-align: center;">
+                    Metrik evaluasi didapatkan dari pengujian test set asli model.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kembalikan ke tampilan awal saat halaman di-refresh (mencegah resubmission)
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+        
+        const navEntries = performance.getEntriesByType("navigation");
+        if ((navEntries.length > 0 && navEntries[0].type === "reload") || 
+            (performance.navigation && performance.navigation.type === 1)) {
+            window.location.href = window.location.pathname;
+        }
+
+        // Generate floating particles
+        (function() {
+            const container = document.getElementById('particles');
+            const count = 30;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 12) + 's';
+                p.style.animationDelay = (Math.random() * 15) + 's';
+                p.style.width = (2 + Math.random() * 3) + 'px';
+                p.style.height = p.style.width;
+                // Alternate colors between PLN blue and gold
+                if (Math.random() > 0.5) {
+                    p.style.background = 'rgba(255, 193, 7, 0.5)';
+                    p.style.boxShadow = '0 0 6px rgba(255, 193, 7, 0.3)';
+                }
+                container.appendChild(p);
+            }
+        })();
+
+        // Button loading state on submit
+        document.getElementById('sentimentForm').addEventListener('submit', function() {
+            const btn = document.getElementById('btnSubmit');
+            btn.classList.add('loading');
+        });
+
+        // Animate confidence bar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const fill = document.querySelector('.confidence-fill');
+            if (fill) {
+                setTimeout(function() {
+                    fill.style.width = fill.getAttribute('data-width');
+                }, 300);
+            }
+            
+            // Animate gauge speedometer on page load
+            const gaugeBg = document.querySelector('.gauge-bg');
+            const gaugeNeedle = document.querySelector('.gauge-needle');
+            
+            if (gaugeBg && gaugeNeedle) {
+                setTimeout(function() {
+                    const negVal = gaugeBg.getAttribute('data-neg');
+                    gaugeBg.style.setProperty('--neg-pct', negVal);
+                    gaugeNeedle.style.setProperty('--neg-pct', negVal);
+                }, 300);
+            }
+            
+            // Modal Logic
+            const btnInfoModelIndoBERT = document.getElementById('btnInfoModelIndoBERT');
+            const btnInfoModelVADER = document.getElementById('btnInfoModelVADER');
+            const modelModal = document.getElementById('modelModal');
+            const closeModal = document.getElementById('closeModal');
+            const statsIndoBERT = document.getElementById('statsIndoBERT');
+            const statsVADER = document.getElementById('statsVADER');
+            const modelComparison = document.getElementById('modelComparison');
+
+            function showModal(modelName) {
+                if (!modelModal) return;
+                modelModal.classList.add('active');
+                if (modelName === 'IndoBERT') {
+                    statsIndoBERT.style.display = 'block';
+                    statsVADER.style.display = 'none';
+                } else {
+                    statsIndoBERT.style.display = 'none';
+                    statsVADER.style.display = 'block';
+                }
+                modelComparison.style.gridTemplateColumns = '1fr';
+            }
+
+            if (btnInfoModelIndoBERT) {
+                btnInfoModelIndoBERT.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showModal('IndoBERT');
+                });
+            }
+            
+            if (btnInfoModelVADER) {
+                btnInfoModelVADER.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showModal('VADER');
+                });
+            }
+
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    modelModal.classList.remove('active');
+                });
+            }
+            
+            if (modelModal) {
+                modelModal.addEventListener('click', function(e) {
+                    if (e.target === modelModal) {
+                        modelModal.classList.remove('active');
+                    }
+                });
+            }
+
+            // Algorithm Selection Logic
+            const chips = document.querySelectorAll('.algo-chip');
+            const hiddenInput = document.getElementById('algoritma_input');
+            
+            chips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    // Remove selected from all
+                    chips.forEach(c => c.classList.remove('selected'));
+                    // Add selected to clicked
+                    this.classList.add('selected');
+                    // Update hidden input
+                    hiddenInput.value = this.getAttribute('data-value');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

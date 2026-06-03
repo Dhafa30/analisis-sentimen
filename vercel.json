@@ -1,0 +1,17 @@
+{
+  "builds": [
+    {
+      "src": "pln_sentiment/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "250mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "pln_sentiment/wsgi.py"
+    }
+  ]
+}

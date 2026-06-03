@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+results/
+dataset_pln_balanced_1000.xlsx
+.env
+venv/
+env/
+.venv/
