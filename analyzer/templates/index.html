@@ -1339,22 +1339,56 @@
             <div class="modal-body">
                 <div class="model-comparison" id="modelComparison">
                     <!-- IndoBERT -->
-                    <div class="model-stats" id="statsIndoBERT">
-                        <div class="ms-title">🧠 IndoBERT</div>
-                        <div class="ms-row"><span>Akurasi:</span> <strong>{{ base_metrik_indobert.akurasi|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>Presisi:</span> <strong>{{ base_metrik_indobert.presisi|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>Recall:</span> <strong>{{ base_metrik_indobert.recall|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>F1-Score:</span> <strong>{{ base_metrik_indobert.f1|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>Kappa:</span> <strong>{{ base_metrik_indobert.kappa|default:"-" }}</strong></div>
+                    <div class="model-stats" id="statsIndoBERT" style="background: none; border: none; padding: 0;">
+                        <div class="ms-title" style="font-size: 1.1rem; color: #4db8ff; border: none; margin-bottom: 20px;">🧠 IndoBERT</div>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_indobert.akurasi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Akurasi</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_indobert.presisi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Presisi</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_indobert.recall|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Recall</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_indobert.f1|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">F1-Score</div>
+                            </div>
+                            <div class="metric-card kappa-card">
+                                <div class="metric-value">{{ base_metrik_indobert.kappa|default:"-" }}</div>
+                                <div class="metric-name">Cohen's Kappa</div>
+                            </div>
+                        </div>
                     </div>
                     <!-- VADER -->
-                    <div class="model-stats" id="statsVADER">
-                        <div class="ms-title">📊 VADER</div>
-                        <div class="ms-row"><span>Akurasi:</span> <strong>{{ base_metrik_vader.akurasi|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>Presisi:</span> <strong>{{ base_metrik_vader.presisi|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>Recall:</span> <strong>{{ base_metrik_vader.recall|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>F1-Score:</span> <strong>{{ base_metrik_vader.f1|default:"-" }}%</strong></div>
-                        <div class="ms-row"><span>Kappa:</span> <strong>{{ base_metrik_vader.kappa|default:"-" }}</strong></div>
+                    <div class="model-stats" id="statsVADER" style="background: none; border: none; padding: 0;">
+                        <div class="ms-title" style="font-size: 1.1rem; color: #00e68a; border: none; margin-bottom: 20px;">📊 VADER</div>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_vader.akurasi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Akurasi</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_vader.presisi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Presisi</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_vader.recall|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">Recall</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">{{ base_metrik_vader.f1|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-name">F1-Score</div>
+                            </div>
+                            <div class="metric-card kappa-card">
+                                <div class="metric-value">{{ base_metrik_vader.kappa|default:"-" }}</div>
+                                <div class="metric-name">Cohen's Kappa</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div style="margin-top: 16px; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-align: center;">
