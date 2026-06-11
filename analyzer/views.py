@@ -9,9 +9,9 @@ from googletrans import Translator
 # Hardcode metrik evaluasi VADER
 METRIK_VADER = {
     'akurasi': 76.00,
-    'presisi': 75.98,
-    'recall': 76.00,
-    'f1': 75.98,
+    'presisi': 76.85,
+    'recall': 78.30,
+    'f1': 77.57,
     'kappa': 0.5177,
 }
 
@@ -21,9 +21,9 @@ def home(request):
     context = {
         'base_metrik_indobert': {
             'akurasi': 94.00,
-            'presisi': 94.02,
-            'recall': 94.00,
-            'f1': 94.00,
+            'presisi': 94.90,
+            'recall': 93.00,
+            'f1': 93.94,
             'kappa': 0.8800,
         },
         'base_metrik_vader': METRIK_VADER,
