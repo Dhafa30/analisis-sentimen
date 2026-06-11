@@ -27,10 +27,13 @@ def evaluasi_model(nama_model, y_test, y_pred):
     print(f"F1-Score      : {f1 * 100:.2f}%")
     print(f"Cohen's Kappa : {kappa:.4f}")
     
-    # Bikin gambar Confusion Matrix
-    cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Negatif (0)', 'Positif (1)'])
-    disp.plot(cmap='Blues', values_format='d')
+    # Bikin gambar Confusion Matrix dengan urutan Positif(1) di atas/kiri dan Negatif(0) di bawah/kanan
+    cm = confusion_matrix(y_test, y_pred, labels=[1, 0])
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Positif (1)', 'Negatif (0)'])
+    if nama_model == "IndoBERT":
+        disp.plot(cmap='Greens', values_format='d')
+    else:
+        disp.plot(cmap='Blues', values_format='d')
     plt.title(f'Confusion Matrix - {nama_model}')
     
     # Simpan gambar kualitas HD (dpi=300)
