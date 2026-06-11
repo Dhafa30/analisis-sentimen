@@ -9,10 +9,10 @@ from googletrans import Translator
 # Hardcode metrik evaluasi VADER
 METRIK_VADER = {
     'akurasi': 76.00,
-    'presisi': 75.50,
+    'presisi': 75.98,
     'recall': 76.00,
-    'f1': 75.80,
-    'kappa': 0.5200,
+    'f1': 75.98,
+    'kappa': 0.5177,
 }
 
 
