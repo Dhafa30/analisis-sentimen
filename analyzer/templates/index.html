@@ -276,6 +276,31 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
+        .quick-fill {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-quick {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-quick:hover {
+            background: var(--bg-input-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+
         /* ─── Algorithm Selection ─── */
         .algo-info {
             display: flex;
@@ -873,10 +898,17 @@
                         </div>
                         <div class="algo-warning" id="algoWarning">⚠️ Silakan pilih algoritma terlebih dahulu</div>
 
-                        <label for="teks_ulasan">
+                        <label for="teks_ulasan" style="margin-bottom: 4px;">
                             <span class="icon">✍️</span> Teks Ulasan
                         </label>
-                        <textarea name="teks_ulasan" id="teks_ulasan" rows="6" placeholder="Contoh: Aplikasi ini sering error saat beli token..." required>{{ teks_input }}</textarea>
+                        
+                        <div class="quick-fill">
+                            <button type="button" class="btn-quick" onclick="document.getElementById('teks_ulasan').value='Aplikasi ini sangat bagus, saya bisa beli token listrik dengan mudah dan cepat. Terima kasih PLN!'">✨ Contoh Positif</button>
+                            <button type="button" class="btn-quick" onclick="document.getElementById('teks_ulasan').value='Sering error kalau mau bayar tagihan, aplikasinya lemot banget tolong dong diperbaiki secepatnya.'">⚠️ Contoh Negatif</button>
+                            <button type="button" class="btn-quick" onclick="document.getElementById('teks_ulasan').value='Saya sudah menginstall aplikasi pln mobile di hp saya kemarin.'">😐 Contoh Netral</button>
+                        </div>
+
+                        <textarea name="teks_ulasan" id="teks_ulasan" rows="6" placeholder="Ketik ulasan atau klik contoh di atas..." required>{{ teks_input }}</textarea>
 
                         <button type="submit" class="btn-submit" id="btnSubmit">
                             <span class="btn-text">Analisis Sentimen</span>
@@ -949,6 +981,9 @@
                                 <div class="metric-value">{{ kappa }}</div>
                                 <div class="metric-name">Cohen's Kappa</div>
                             </div>
+                        </div>
+                        <div style="margin-top: 14px; font-size: 0.72rem; color: var(--text-faint); text-align: center; border-top: 1px dashed var(--border); padding-top: 14px;">
+                            ⏱️ Waktu Eksekusi Model: <strong style="color: var(--text-primary);">{{ waktu_eksekusi }}</strong> detik
                         </div>
                     </div>
                     {% endif %}

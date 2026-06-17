@@ -3,6 +3,7 @@ import json
 import os
 import urllib.request
 import urllib.error
+import time
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from googletrans import Translator
 
@@ -39,6 +40,8 @@ def home(request):
         teks_terjemahan = ""
         prob_positif = 0.0
         prob_negatif = 0.0
+        
+        start_time = time.time()
 
         # --- JIKA MEMILIH VADER ---
         if algoritma == "VADER":
@@ -154,6 +157,8 @@ def home(request):
         else:
             kesimpulan = "Ulasan ini bersifat netral atau tidak menunjukkan emosi yang dominan."
 
+        waktu_eksekusi = round(time.time() - start_time, 3)
+
         context.update({
             'teks_input': teks_ulasan,
             'algoritma': algoritma,
@@ -169,6 +174,7 @@ def home(request):
             'recall': metrik.get('recall', '-'),
             'f1': metrik.get('f1', '-'),
             'kappa': metrik.get('kappa', '-'),
+            'waktu_eksekusi': waktu_eksekusi,
         })
         
     return render(request, 'index.html', context)
