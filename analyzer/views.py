@@ -8,11 +8,11 @@ from googletrans import Translator
 
 # Hardcode metrik evaluasi VADER
 METRIK_VADER = {
-    'akurasi': 76.00,
-    'presisi': 76.85,
-    'recall': 78.30,
-    'f1': 77.57,
-    'kappa': 0.5177,
+    'akurasi': "76.00",
+    'presisi': "76.85",
+    'recall': "78.30",
+    'f1': "77.57",
+    'kappa': "0.5177",
 }
 
 
@@ -20,11 +20,11 @@ def home(request):
     # Menggunakan nilai hasil latih dari Colab untuk IndoBERT
     context = {
         'base_metrik_indobert': {
-            'akurasi': 94.00,
-            'presisi': 94.90,
-            'recall': 93.00,
-            'f1': 93.94,
-            'kappa': 0.8800,
+            'akurasi': "94.00",
+            'presisi': "94.90",
+            'recall': "93.00",
+            'f1': "93.94",
+            'kappa': "0.8800",
         },
         'base_metrik_vader': METRIK_VADER,
     }
@@ -164,11 +164,11 @@ def home(request):
             'prob_negatif': prob_negatif,
             'teks_terjemahan': teks_terjemahan,
             'kesimpulan': kesimpulan,
-            'akurasi': confidence,
-            'presisi': confidence,
-            'recall': confidence,
-            'f1': confidence,
-            'kappa': round(confidence / 100, 4) if confidence else 0.0,
+            'akurasi': metrik.get('akurasi', '-'),
+            'presisi': metrik.get('presisi', '-'),
+            'recall': metrik.get('recall', '-'),
+            'f1': metrik.get('f1', '-'),
+            'kappa': metrik.get('kappa', '-'),
         })
         
     return render(request, 'index.html', context)
