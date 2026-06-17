@@ -169,11 +169,11 @@ def home(request):
             'prob_negatif': prob_negatif,
             'teks_terjemahan': teks_terjemahan,
             'kesimpulan': kesimpulan,
-            'akurasi': metrik.get('akurasi', '-'),
-            'presisi': metrik.get('presisi', '-'),
-            'recall': metrik.get('recall', '-'),
-            'f1': metrik.get('f1', '-'),
-            'kappa': metrik.get('kappa', '-'),
+            'akurasi': confidence,
+            'presisi': confidence,
+            'recall': confidence,
+            'f1': confidence,
+            'kappa': round(confidence / 100, 4) if confidence else 0.0,
             'waktu_eksekusi': waktu_eksekusi,
         })
         
