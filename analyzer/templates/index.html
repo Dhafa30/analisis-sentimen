@@ -217,6 +217,30 @@
             color: #e5e7eb;
         }
 
+        .algo-warning {
+            font-size: 0.75rem;
+            color: #ef4444;
+            margin-top: -12px;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .algo-warning.show {
+            display: flex;
+        }
+
+        .algo-chip.shake {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
         .algo-chip .chip-icon { font-size: 1.3rem; }
 
         .algo-chip strong {
@@ -726,7 +750,7 @@
                     <form method="POST" id="sentimentForm">
                         {% csrf_token %}
 
-                        <input type="hidden" name="algoritma" id="algoritma_input" value="{% if algoritma %}{{ algoritma }}{% else %}IndoBERT{% endif %}">
+                        <input type="hidden" name="algoritma" id="algoritma_input" value="{% if algoritma %}{{ algoritma }}{% endif %}">
                         <input type="hidden" name="hf_raw_result" id="hf_raw_result" value="">
 
                         <label>
@@ -734,7 +758,7 @@
                         </label>
 
                         <div class="algo-info" id="algo-selection">
-                            <div class="algo-chip {% if algoritma == 'IndoBERT' or not algoritma %}selected{% endif %}" data-value="IndoBERT" style="padding-right: 40px;">
+                            <div class="algo-chip {% if algoritma == 'IndoBERT' %}selected{% endif %}" data-value="IndoBERT" style="padding-right: 40px;">
                                 <span class="chip-icon">🧠</span>
                                 <div>
                                     <strong>IndoBERT</strong>
@@ -751,6 +775,7 @@
                                 <button type="button" id="btnInfoModelVADER" class="info-btn" title="Lihat performa asli model VADER">!</button>
                             </div>
                         </div>
+                        <div class="algo-warning" id="algoWarning">⚠️ Silakan pilih algoritma terlebih dahulu</div>
 
                         <label for="teks_ulasan">
                             <span class="icon">✍️</span> Teks Ulasan
@@ -963,8 +988,20 @@
             window.location.href = window.location.pathname;
         }
 
-        // Loading state
-        document.getElementById('sentimentForm').addEventListener('submit', function() {
+        // Form submit with validation
+        document.getElementById('sentimentForm').addEventListener('submit', function(e) {
+            const algoValue = document.getElementById('algoritma_input').value;
+            const warning = document.getElementById('algoWarning');
+            if (!algoValue) {
+                e.preventDefault();
+                warning.classList.add('show');
+                document.querySelectorAll('.algo-chip').forEach(c => c.classList.add('shake'));
+                setTimeout(() => {
+                    document.querySelectorAll('.algo-chip').forEach(c => c.classList.remove('shake'));
+                }, 400);
+                return;
+            }
+            warning.classList.remove('show');
             document.getElementById('btnSubmit').classList.add('loading');
         });
 
@@ -1035,6 +1072,9 @@
                     chips.forEach(c => c.classList.remove('selected'));
                     this.classList.add('selected');
                     hiddenInput.value = this.getAttribute('data-value');
+                    // Hide warning when user selects
+                    const w = document.getElementById('algoWarning');
+                    if (w) w.classList.remove('show');
                 });
             });
         });
