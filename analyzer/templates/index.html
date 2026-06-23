@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,77 +9,90 @@
     <title>Analisis Sentimen PLN Mobile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
         /* ─── Theme Variables ─── */
         :root {
-            --bg-body: #0f1117;
-            --bg-card: #181b25;
-            --bg-input: #1c1f2a;
-            --bg-input-hover: #21242f;
-            --border: #252830;
-            --border-hover: #3d4150;
-            --text-primary: #f3f4f6;
-            --text-body: #d1d5db;
-            --text-muted: #9ca3af;
-            --text-faint: #6b7280;
-            --text-dim: #4b5563;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --accent-bg: rgba(59, 130, 246, 0.08);
-            --accent-border: rgba(59, 130, 246, 0.2);
-            --accent-light: #60a5fa;
-            --green: #22c55e;
-            --green-bg: rgba(34, 197, 94, 0.12);
-            --green-border: rgba(34, 197, 94, 0.25);
-            --red: #ef4444;
-            --red-bg: rgba(239, 68, 68, 0.12);
-            --red-border: rgba(239, 68, 68, 0.25);
-            --red-light: #f87171;
-            --yellow: #f59e0b;
-            --yellow-bg: rgba(245, 158, 11, 0.12);
-            --yellow-border: rgba(245, 158, 11, 0.25);
-            --gauge-inner: #1c1f2a;
-            --needle: #e5e7eb;
-            --modal-bg: #181b25;
-            --tag-author-bg: rgba(255, 255, 255, 0.04);
+            --bg-body: #0b0d14;
+            --bg-card: #13161f;
+            --bg-input: #181c27;
+            --bg-input-hover: #1e2230;
+            --border: #1f2333;
+            --border-hover: #2e3348;
+            --text-primary: #f1f3f9;
+            --text-body: #c8cdd8;
+            --text-muted: #8b92a5;
+            --text-faint: #5c6378;
+            --text-dim: #3d4455;
+            --accent: #4f8ff7;
+            --accent-hover: #3b7be8;
+            --accent-bg: rgba(79, 143, 247, 0.07);
+            --accent-border: rgba(79, 143, 247, 0.18);
+            --accent-light: #6ba3fa;
+            --accent-glow: rgba(79, 143, 247, 0.12);
+            --green: #34d399;
+            --green-bg: rgba(52, 211, 153, 0.08);
+            --green-border: rgba(52, 211, 153, 0.2);
+            --red: #f87171;
+            --red-bg: rgba(248, 113, 113, 0.08);
+            --red-border: rgba(248, 113, 113, 0.2);
+            --red-light: #fca5a5;
+            --yellow: #fbbf24;
+            --yellow-bg: rgba(251, 191, 36, 0.1);
+            --yellow-border: rgba(251, 191, 36, 0.2);
+            --gauge-inner: #181c27;
+            --needle: #e2e5ee;
+            --modal-bg: #13161f;
+            --tag-author-bg: rgba(255, 255, 255, 0.03);
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+            --card-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.3);
         }
 
         [data-theme="light"] {
-            --bg-body: #f3f4f6;
+            --bg-body: #f0f2f5;
             --bg-card: #ffffff;
-            --bg-input: #f9fafb;
-            --bg-input-hover: #f3f4f6;
-            --border: #e5e7eb;
-            --border-hover: #d1d5db;
-            --text-primary: #111827;
-            --text-body: #374151;
-            --text-muted: #6b7280;
-            --text-faint: #9ca3af;
-            --text-dim: #d1d5db;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --accent-bg: rgba(37, 99, 235, 0.06);
-            --accent-border: rgba(37, 99, 235, 0.25);
-            --accent-light: #2563eb;
-            --green: #16a34a;
-            --green-bg: rgba(22, 163, 74, 0.08);
-            --green-border: rgba(22, 163, 74, 0.2);
-            --red: #dc2626;
-            --red-bg: rgba(220, 38, 38, 0.08);
-            --red-border: rgba(220, 38, 38, 0.2);
-            --red-light: #dc2626;
-            --yellow: #d97706;
-            --yellow-bg: rgba(217, 119, 6, 0.08);
-            --yellow-border: rgba(217, 119, 6, 0.2);
-            --gauge-inner: #f9fafb;
-            --needle: #374151;
+            --bg-input: #f6f8fb;
+            --bg-input-hover: #eef1f6;
+            --border: #e0e4eb;
+            --border-hover: #cdd2db;
+            --text-primary: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --text-faint: #94a3b8;
+            --text-dim: #cbd5e1;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-bg: rgba(59, 130, 246, 0.05);
+            --accent-border: rgba(59, 130, 246, 0.2);
+            --accent-light: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.08);
+            --green: #10b981;
+            --green-bg: rgba(16, 185, 129, 0.06);
+            --green-border: rgba(16, 185, 129, 0.18);
+            --red: #ef4444;
+            --red-bg: rgba(239, 68, 68, 0.06);
+            --red-border: rgba(239, 68, 68, 0.18);
+            --red-light: #ef4444;
+            --yellow: #f59e0b;
+            --yellow-bg: rgba(245, 158, 11, 0.06);
+            --yellow-border: rgba(245, 158, 11, 0.18);
+            --gauge-inner: #f6f8fb;
+            --needle: #334155;
             --modal-bg: #ffffff;
-            --tag-author-bg: rgba(0, 0, 0, 0.04);
+            --tag-author-bg: rgba(0, 0, 0, 0.03);
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.04);
+            --card-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.08), 0 10px 24px rgba(0, 0, 0, 0.06);
         }
 
         /* ─── Reset & Base ─── */
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -90,7 +104,7 @@
             justify-content: center;
             padding: 40px 20px;
             overflow-x: hidden;
-            transition: background 0.3s ease, color 0.3s ease;
+            transition: background 0.35s ease, color 0.35s ease;
         }
 
         /* ─── Main Container ─── */
@@ -101,42 +115,53 @@
 
         .container {
             background: var(--bg-card);
-            padding: 40px 36px 36px;
-            border-radius: 16px;
+            padding: 44px 40px 40px;
+            border-radius: 20px;
             border: 1px solid var(--border);
-            animation: fadeIn 0.5s ease both;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            box-shadow: var(--card-shadow);
+            animation: fadeIn 0.6s ease both;
+            transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ─── Header ─── */
         .header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 36px;
         }
 
         .header h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.65rem;
+            font-weight: 900;
             color: var(--text-primary);
-            letter-spacing: -0.02em;
-            line-height: 1.3;
+            letter-spacing: -0.03em;
+            line-height: 1.25;
         }
 
         .header h1 span {
-            color: var(--accent);
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header-sub {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-top: 10px;
+            gap: 10px;
+            margin-top: 14px;
             flex-wrap: wrap;
         }
 
@@ -144,12 +169,13 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.68rem;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.66rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
         }
 
         .tag-ml {
@@ -164,40 +190,51 @@
             border: 1px solid var(--border);
         }
 
+        .tag-dosen {
+            background: transparent;
+            color: var(--text-faint);
+            border: 1px dashed var(--border);
+            font-size: 0.62rem;
+            padding: 3px 10px;
+        }
+
         .header-desc {
             font-size: 0.82rem;
             color: var(--text-faint);
-            margin-top: 8px;
+            margin-top: 10px;
+            font-weight: 400;
         }
 
         /* ─── Theme Toggle ─── */
         .theme-toggle {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 18px;
+            right: 18px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.1rem;
-            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+            transition: all 0.25s ease;
         }
 
         .theme-toggle:hover {
-            border-color: var(--border-hover);
+            border-color: var(--accent-border);
+            background: var(--accent-bg);
             color: var(--text-primary);
+            transform: scale(1.05);
         }
 
         .divider {
             height: 1px;
-            background: var(--border);
-            margin-bottom: 32px;
+            background: linear-gradient(to right, transparent, var(--border), transparent);
+            margin-bottom: 36px;
         }
 
         /* ─── Layout Grid ─── */
@@ -213,9 +250,11 @@
                 gap: 28px;
                 align-items: start;
             }
+
             .content-grid.has-result {
                 grid-template-columns: 340px 1fr 300px;
             }
+
             .empty-state-wrapper {
                 grid-column: 2 / 3;
             }
@@ -226,14 +265,34 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            min-height: 240px;
+            min-height: 260px;
             background: var(--bg-input);
             border: 1px dashed var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             color: var(--text-faint);
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             text-align: center;
-            padding: 30px;
+            padding: 36px;
+            line-height: 1.7;
+        }
+
+        .empty-state-icon {
+            font-size: 2.5rem;
+            margin-bottom: 14px;
+            opacity: 0.35;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
         }
 
         /* ─── Labels ─── */
@@ -243,43 +302,49 @@
             align-items: center;
             gap: 6px;
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             margin-bottom: 8px;
         }
 
-        label .icon { font-size: 0.85rem; }
+        label .icon {
+            font-size: 0.85rem;
+        }
 
         /* ─── Form Controls ─── */
         textarea {
             width: 100%;
             padding: 14px 16px;
             margin-bottom: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid var(--border);
             background: var(--bg-input);
             color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
             outline: none;
             resize: vertical;
             min-height: 120px;
         }
 
-        textarea::placeholder { color: var(--text-dim); }
+        textarea::placeholder {
+            color: var(--text-dim);
+        }
 
         textarea:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: var(--bg-input-hover);
         }
 
         .quick-fill {
             display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 14px;
             flex-wrap: wrap;
         }
 
@@ -287,18 +352,20 @@
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.68rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            letter-spacing: 0.02em;
         }
 
         .btn-quick:hover {
-            background: var(--bg-input-hover);
-            color: var(--text-primary);
-            border-color: var(--border-hover);
+            background: var(--accent-bg);
+            color: var(--accent-light);
+            border-color: var(--accent-border);
+            transform: translateY(-1px);
         }
 
         /* ─── Algorithm Selection ─── */
@@ -313,36 +380,39 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 14px;
-            border-radius: 10px;
+            padding: 14px 16px;
+            border-radius: 12px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             font-size: 0.75rem;
             color: var(--text-muted);
             cursor: pointer;
-            transition: border-color 0.2s ease, background 0.2s ease;
+            transition: all 0.25s ease;
             position: relative;
         }
 
         .algo-chip:hover {
             background: var(--bg-input-hover);
             border-color: var(--border-hover);
+            transform: translateY(-1px);
         }
 
         .algo-chip.selected {
             background: var(--accent-bg);
             border-color: var(--accent);
             color: var(--text-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
         .algo-warning {
             font-size: 0.75rem;
-            color: #ef4444;
+            color: var(--red);
             margin-top: -12px;
             margin-bottom: 16px;
             display: none;
             align-items: center;
             gap: 4px;
+            font-weight: 500;
         }
 
         .algo-warning.show {
@@ -354,12 +424,24 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+            }
+
+            75% {
+                transform: translateX(4px);
+            }
         }
 
-        .algo-chip .chip-icon { font-size: 1.3rem; }
+        .algo-chip .chip-icon {
+            font-size: 1.3rem;
+        }
 
         .algo-chip strong {
             color: var(--text-primary);
@@ -378,7 +460,7 @@
             border: 1px solid var(--yellow-border);
             color: var(--yellow);
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -386,35 +468,45 @@
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            transition: background 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .info-btn:hover {
-            background: rgba(245, 158, 11, 0.2);
+            background: rgba(251, 191, 36, 0.2);
+            transform: translateY(-50%) scale(1.1);
         }
 
         /* ─── Buttons ─── */
         .btn-submit {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), #6366f1);
             color: white;
             border: none;
-            padding: 13px 20px;
-            border-radius: 10px;
+            padding: 14px 20px;
+            border-radius: 12px;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.88rem;
+            font-weight: 700;
             width: 100%;
-            transition: background 0.2s ease, transform 0.1s ease;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             position: relative;
+            box-shadow: 0 2px 8px rgba(79, 143, 247, 0.25);
+            letter-spacing: 0.01em;
         }
 
-        .btn-submit:hover { background: var(--accent-hover); }
-        .btn-submit:active { transform: scale(0.98); }
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(79, 143, 247, 0.35);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(79, 143, 247, 0.2);
+        }
 
         .btn-reset {
             background: transparent;
@@ -422,13 +514,13 @@
             border: 1px solid var(--border);
             padding: 13px 20px;
             margin-top: 10px;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             width: 100%;
-            transition: border-color 0.2s ease, color 0.2s ease;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -437,8 +529,9 @@
         }
 
         .btn-reset:hover {
-            border-color: var(--red);
+            border-color: var(--red-border);
             color: var(--red);
+            background: var(--red-bg);
         }
 
         /* ─── Loading ─── */
@@ -446,49 +539,70 @@
             pointer-events: none;
             opacity: 0.7;
         }
-        .btn-submit.loading .btn-text { opacity: 0; }
+
+        .btn-submit.loading .btn-text {
+            opacity: 0;
+        }
+
         .btn-submit.loading::after {
             content: '';
             position: absolute;
-            width: 18px; height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* ─── Result Card ─── */
         .result {
-            padding: 22px 24px;
+            padding: 24px 26px;
             background: var(--bg-card);
             border: 1px solid var(--green-border);
             border-left: 4px solid var(--green);
-            border-radius: 12px;
-            animation: slideIn 0.4s ease both;
+            border-radius: 14px;
+            animation: slideIn 0.5s ease both;
+            box-shadow: 0 2px 12px rgba(52, 211, 153, 0.06);
         }
 
         .result.negatif {
             border-color: var(--red-border);
             border-left-color: var(--red);
+            box-shadow: 0 2px 12px rgba(248, 113, 113, 0.06);
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .result-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 14px;
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
-        .result-header .result-icon { font-size: 1.1rem; }
+        .result-header .result-icon {
+            font-size: 1.15rem;
+        }
 
         .result h3 {
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             font-weight: 700;
             color: var(--text-primary);
         }
@@ -503,14 +617,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 9px 12px;
-            border-radius: 8px;
+            padding: 10px 14px;
+            border-radius: 10px;
             background: var(--bg-input);
             border: 1px solid var(--border);
+            transition: border-color 0.2s ease;
+        }
+
+        .result-item:hover {
+            border-color: var(--border-hover);
         }
 
         .result-item .item-label {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             color: var(--text-faint);
             font-weight: 500;
         }
@@ -521,9 +640,17 @@
             font-weight: 600;
         }
 
-        .result-item .item-value.positif { color: var(--green); }
-        .result-item .item-value.negatif-text { color: var(--red); }
-        .result-item .item-value.netral { color: var(--yellow); }
+        .result-item .item-value.positif {
+            color: var(--green);
+        }
+
+        .result-item .item-value.negatif-text {
+            color: var(--red);
+        }
+
+        .result-item .item-value.netral {
+            color: var(--yellow);
+        }
 
         /* ─── Sentiment Badge ─── */
         .sentiment-badge {
@@ -531,10 +658,10 @@
             align-items: center;
             gap: 6px;
             padding: 6px 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 700;
-            font-size: 0.78rem;
-            letter-spacing: 0.04em;
+            font-size: 0.76rem;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
         }
 
@@ -559,23 +686,24 @@
         /* ─── Speedometer ─── */
         .speedometer-container {
             height: 100%;
-            padding: 22px 18px 16px;
+            padding: 24px 20px 18px;
             background: var(--bg-input);
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid var(--border);
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            transition: border-color 0.2s ease;
         }
 
         .speedometer-title {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 700;
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -592,24 +720,26 @@
 
         .gauge-bg {
             position: absolute;
-            top: 0; left: 0;
-            width: 200px; height: 200px;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
-            background: conic-gradient(
-                from 270deg,
-                var(--red) 0%,
-                var(--red) calc(var(--neg-pct) * 0.5%),
-                var(--green) calc(var(--neg-pct) * 0.5%),
-                var(--green) 50%,
-                transparent 50%
-            );
+            background: conic-gradient(from 270deg,
+                    var(--red) 0%,
+                    var(--red) calc(var(--neg-pct) * 0.5%),
+                    var(--green) calc(var(--neg-pct) * 0.5%),
+                    var(--green) 50%,
+                    transparent 50%);
             --neg-pct: 50;
         }
 
         .gauge-inner {
             position: absolute;
-            top: 18px; left: 18px;
-            width: 164px; height: 164px;
+            top: 18px;
+            left: 18px;
+            width: 164px;
+            height: 164px;
             border-radius: 50%;
             background: var(--gauge-inner);
             z-index: 1;
@@ -617,8 +747,10 @@
 
         .gauge-needle {
             position: absolute;
-            bottom: 0; left: 50%;
-            width: 4px; height: 85px;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 85px;
             background: var(--needle);
             border-radius: 3px;
             transform-origin: bottom center;
@@ -631,9 +763,11 @@
         .gauge-needle::after {
             content: '';
             position: absolute;
-            bottom: -6px; left: 50%;
+            bottom: -6px;
+            left: 50%;
             transform: translateX(-50%);
-            width: 14px; height: 14px;
+            width: 14px;
+            height: 14px;
             background: var(--needle);
             border-radius: 50%;
         }
@@ -642,54 +776,77 @@
             display: flex;
             justify-content: space-between;
             margin-top: 14px;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 600;
         }
 
-        .lbl-neg { color: var(--red); display: flex; flex-direction: column; align-items: flex-start; }
-        .lbl-pos { color: var(--green); display: flex; flex-direction: column; align-items: flex-end; }
-        .lbl-val { font-size: 1.15rem; font-weight: 800; margin-top: 3px; }
+        .lbl-neg {
+            color: var(--red);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .lbl-pos {
+            color: var(--green);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .lbl-val {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-top: 3px;
+        }
 
         /* ─── Conclusion ─── */
         .speedometer-conclusion {
-            margin-top: 14px;
-            padding: 14px 16px;
+            margin-top: 16px;
+            padding: 16px 18px;
             background: var(--bg-card);
-            border-radius: 10px;
+            border-radius: 12px;
             border-left: 3px solid var(--accent);
             font-size: 0.82rem;
             color: var(--text-body);
-            line-height: 1.6;
+            line-height: 1.65;
             text-align: left;
         }
 
-        .speedometer-conclusion.pos { border-left-color: var(--green); }
-        .speedometer-conclusion.neg { border-left-color: var(--red); }
+        .speedometer-conclusion.pos {
+            border-left-color: var(--green);
+        }
+
+        .speedometer-conclusion.neg {
+            border-left-color: var(--red);
+        }
 
         /* ─── Metrics ─── */
         .metrics-section {
-            margin-top: 18px;
-            animation: slideIn 0.4s ease 0.1s both;
+            margin-top: 20px;
+            animation: slideIn 0.5s ease 0.1s both;
         }
 
         .metrics-title {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             color: var(--text-muted);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
         }
 
-        .metrics-title .mt-icon { font-size: 0.9rem; }
+        .metrics-title .mt-icon {
+            font-size: 0.9rem;
+        }
 
         .metrics-title .mt-line {
             flex: 1;
             height: 1px;
-            background: var(--border);
+            background: linear-gradient(to right, var(--border), transparent);
         }
 
         .metrics-grid {
@@ -699,20 +856,22 @@
         }
 
         .metric-card {
-            padding: 14px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             text-align: center;
-            transition: border-color 0.2s ease;
+            transition: all 0.25s ease;
         }
 
         .metric-card:hover {
             border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .metric-card .metric-value {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: var(--accent-light);
             line-height: 1.2;
@@ -725,12 +884,12 @@
         }
 
         .metric-card .metric-name {
-            font-size: 0.65rem;
+            font-size: 0.63rem;
             color: var(--text-faint);
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-top: 4px;
+            letter-spacing: 0.05em;
+            margin-top: 5px;
         }
 
         .metric-card.kappa-card {
@@ -745,36 +904,72 @@
             color: var(--red-light);
         }
 
+        /* ─── Execution Time ─── */
+        .exec-time {
+            margin-top: 16px;
+            font-size: 0.72rem;
+            color: var(--text-faint);
+            text-align: center;
+            border-top: 1px dashed var(--border);
+            padding-top: 16px;
+        }
+
+        .exec-time strong {
+            color: var(--accent-light);
+            font-weight: 700;
+        }
+
         /* ─── Footer ─── */
         .footer {
             text-align: center;
-            margin-top: 20px;
-            font-size: 0.7rem;
+            margin-top: 24px;
+            font-size: 0.68rem;
             color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        .footer-line {
+            opacity: 0.7;
+            display: inline-block;
         }
 
         /* ─── Responsive ─── */
         @media (max-width: 480px) {
-            body { padding: 16px 12px; }
-            .container { padding: 28px 18px 24px; border-radius: 12px; }
-            .header h1 { font-size: 1.25rem; }
-            .algo-info { flex-direction: column; }
-            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            body {
+                padding: 16px 12px;
+            }
+
+            .container {
+                padding: 28px 18px 24px;
+                border-radius: 14px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .algo-info {
+                flex-direction: column;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         /* ─── Modal ─── */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.3s ease;
         }
 
         .modal-overlay.active {
@@ -785,20 +980,21 @@
         .modal-content {
             background: var(--modal-bg);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 18px;
             width: 90%;
             max-width: 500px;
-            transform: translateY(12px);
-            transition: transform 0.25s ease;
+            transform: translateY(16px) scale(0.97);
+            transition: transform 0.3s ease;
             overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
         }
 
         .modal-overlay.active .modal-content {
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
 
         .modal-header {
-            padding: 18px 22px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -817,12 +1013,23 @@
             color: var(--text-faint);
             font-size: 1.3rem;
             cursor: pointer;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
         }
 
-        .modal-close:hover { color: var(--text-primary); }
+        .modal-close:hover {
+            color: var(--text-primary);
+            background: var(--bg-input);
+        }
 
-        .modal-body { padding: 22px; }
+        .modal-body {
+            padding: 24px;
+        }
 
         .model-comparison {
             display: grid;
@@ -845,8 +1052,51 @@
             padding-bottom: 0;
             border: none;
         }
+
+        .modal-note {
+            margin-top: 16px;
+            font-size: 0.72rem;
+            color: var(--text-faint);
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* ─── Stagger animation for results ─── */
+        .result-section .result-item:nth-child(1) {
+            animation: slideIn 0.4s ease 0.05s both;
+        }
+
+        .result-section .result-item:nth-child(2) {
+            animation: slideIn 0.4s ease 0.1s both;
+        }
+
+        .result-section .result-item:nth-child(3) {
+            animation: slideIn 0.4s ease 0.15s both;
+        }
+
+        /* ─── Stagger animation for metric cards ─── */
+        .metrics-grid .metric-card:nth-child(1) {
+            animation: slideIn 0.4s ease 0.15s both;
+        }
+
+        .metrics-grid .metric-card:nth-child(2) {
+            animation: slideIn 0.4s ease 0.2s both;
+        }
+
+        .metrics-grid .metric-card:nth-child(3) {
+            animation: slideIn 0.4s ease 0.25s both;
+        }
+
+        .metrics-grid .metric-card:nth-child(4) {
+            animation: slideIn 0.4s ease 0.3s both;
+        }
+
+        .metrics-grid .metric-card:nth-child(5) {
+            animation: slideIn 0.4s ease 0.35s both;
+        }
     </style>
 </head>
+
 <body>
     <div class="main-wrapper">
         <div class="container" style="position: relative;">
@@ -857,15 +1107,15 @@
             <div class="header">
                 <h1>Analisis Sentimen<br><span>PLN Mobile</span></h1>
                 <div class="header-sub">
-                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                         <span class="tag tag-ml">⚡ Machine Learning</span>
                         <span class="tag tag-author">Muhammad Dhafa Mahardhika · 15220671</span>
                     </div>
-                    <div style="display: flex; justify-content: center; width: 100%; margin-top: -4px;">
-                        <span class="tag tag-author" style="background: transparent; border: 1px solid dashed var(--border); opacity: 0.8; padding: 2px 8px;">Dosen Pembimbing: Yuris Alkhalifi, M.Kom</span>
+                    <div style="display: flex; justify-content: center; width: 100%;">
+                        <span class="tag tag-dosen">Dosen Pembimbing: Yuris Alkhalifi, M.Kom</span>
                     </div>
                 </div>
-                <p class="header-desc">Studi Komparatif Algoritma IndoBERT & VADER</p>
+                <p class="header-desc">Studi komparatif Algoritma IndoBERT & VADER</p>
             </div>
 
             <div class="divider"></div>
@@ -876,7 +1126,8 @@
                     <form method="POST" id="sentimentForm">
                         {% csrf_token %}
 
-                        <input type="hidden" name="algoritma" id="algoritma_input" value="{% if algoritma %}{{ algoritma }}{% endif %}">
+                        <input type="hidden" name="algoritma" id="algoritma_input"
+                            value="{% if algoritma %}{{ algoritma }}{% endif %}">
                         <input type="hidden" name="hf_raw_result" id="hf_raw_result" value="">
 
                         <label>
@@ -884,21 +1135,25 @@
                         </label>
 
                         <div class="algo-info" id="algo-selection">
-                            <div class="algo-chip {% if algoritma == 'IndoBERT' %}selected{% endif %}" data-value="IndoBERT" style="padding-right: 40px;">
+                            <div class="algo-chip {% if algoritma == 'IndoBERT' %}selected{% endif %}"
+                                data-value="IndoBERT" style="padding-right: 40px;">
                                 <span class="chip-icon">🧠</span>
                                 <div>
                                     <strong>IndoBERT</strong>
                                     Deep Learning
                                 </div>
-                                <button type="button" id="btnInfoModelIndoBERT" class="info-btn" title="Lihat performa asli model IndoBERT">!</button>
+                                <button type="button" id="btnInfoModelIndoBERT" class="info-btn"
+                                    title="Lihat performa asli model IndoBERT">!</button>
                             </div>
-                            <div class="algo-chip {% if algoritma == 'VADER' %}selected{% endif %}" data-value="VADER" style="padding-right: 40px;">
+                            <div class="algo-chip {% if algoritma == 'VADER' %}selected{% endif %}" data-value="VADER"
+                                style="padding-right: 40px;">
                                 <span class="chip-icon">📊</span>
                                 <div>
                                     <strong>VADER</strong>
                                     Lexicon-Based
                                 </div>
-                                <button type="button" id="btnInfoModelVADER" class="info-btn" title="Lihat performa asli model VADER">!</button>
+                                <button type="button" id="btnInfoModelVADER" class="info-btn"
+                                    title="Lihat performa asli model VADER">!</button>
                             </div>
                         </div>
                         <div class="algo-warning" id="algoWarning">⚠️ Silakan pilih algoritma terlebih dahulu</div>
@@ -906,13 +1161,18 @@
                         <label for="teks_ulasan" style="margin-bottom: 4px;">
                             <span class="icon">✍️</span> Teks Ulasan
                         </label>
-                        
+
                         <div class="quick-fill">
-                            <button type="button" class="btn-quick" onclick="document.getElementById('teks_ulasan').value='Aplikasi ini sangat bagus, saya bisa beli token listrik dengan mudah dan cepat. Terima kasih PLN!'">✨ Contoh Positif</button>
-                            <button type="button" class="btn-quick" onclick="document.getElementById('teks_ulasan').value='Kecewa banget, saya sudah bayar tagihan tapi di aplikasi statusnya masih belum terbayar dan CS tidak merespons.'">⚠️ Contoh Negatif</button>
+                            <button type="button" class="btn-quick"
+                                onclick="document.getElementById('teks_ulasan').value='Aplikasi ini sangat bagus, saya bisa beli token listrik dengan mudah dan cepat. Terima kasih PLN!'">✨
+                                Contoh Positif</button>
+                            <button type="button" class="btn-quick"
+                                onclick="document.getElementById('teks_ulasan').value='Kecewa banget, saya sudah bayar tagihan tapi di aplikasi statusnya masih belum terbayar dan CS tidak merespons.'">⚠️
+                                Contoh Negatif</button>
                         </div>
 
-                        <textarea name="teks_ulasan" id="teks_ulasan" rows="6" placeholder="Ketik ulasan atau klik contoh di atas..." required>{{ teks_input }}</textarea>
+                        <textarea name="teks_ulasan" id="teks_ulasan" rows="6"
+                            placeholder="Ketik ulasan atau klik contoh di atas..." required>{{ teks_input }}</textarea>
 
                         <button type="submit" class="btn-submit" id="btnSubmit">
                             <span class="btn-text">Analisis Sentimen</span>
@@ -931,7 +1191,8 @@
                 <div class="result-section">
                     <div class="result {% if sentimen == 'Negatif' %}negatif{% endif %}">
                         <div class="result-header">
-                            <span class="result-icon">{% if sentimen == 'Positif' %}✅{% elif sentimen == 'Negatif' %}❌{% else %}⚠️{% endif %}</span>
+                            <span class="result-icon">{% if sentimen == 'Positif' %}✅{% elif sentimen == 'Negatif' %}❌{%
+                                else %}⚠️{% endif %}</span>
                             <h3>Hasil Klasifikasi</h3>
                         </div>
                         <div class="result-body">
@@ -941,8 +1202,10 @@
                             </div>
                             <div class="result-item">
                                 <span class="item-label">Sentimen</span>
-                                <span class="sentiment-badge {% if sentimen == 'Positif' %}positif{% elif sentimen == 'Negatif' %}negatif-badge{% else %}netral-badge{% endif %}">
-                                    {% if sentimen == 'Positif' %}↑{% elif sentimen == 'Negatif' %}↓{% else %}→{% endif %}
+                                <span
+                                    class="sentiment-badge {% if sentimen == 'Positif' %}positif{% elif sentimen == 'Negatif' %}negatif-badge{% else %}netral-badge{% endif %}">
+                                    {% if sentimen == 'Positif' %}↑{% elif sentimen == 'Negatif' %}↓{% else %}→{% endif
+                                    %}
                                     {{ sentimen }}
                                 </span>
                             </div>
@@ -950,7 +1213,9 @@
                             {% if teks_terjemahan %}
                             <div class="result-item">
                                 <span class="item-label">Teks Terjemahan</span>
-                                <span class="item-value" style="font-size: 0.76rem; font-style: italic; font-weight: 400; color: #9ca3af; max-width: 60%; text-align: right; line-height: 1.4;">{{ teks_terjemahan }}</span>
+                                <span class="item-value"
+                                    style="font-size: 0.76rem; font-style: italic; font-weight: 400; color: var(--text-muted); max-width: 60%; text-align: right; line-height: 1.4;">{{
+                                    teks_terjemahan }}</span>
                             </div>
                             {% endif %}
                         </div>
@@ -967,7 +1232,7 @@
                         <div class="metrics-grid">
                             <div class="metric-card">
                                 <div class="metric-value">{{ akurasi }}<span class="metric-unit">%</span></div>
-                                <div class="metric-name">Akurasi</div>
+                                <div class="metric-name">Akurasi (Keyakinan)</div>
                             </div>
                             <div class="metric-card">
                                 <div class="metric-value">{{ presisi }}<span class="metric-unit">%</span></div>
@@ -986,8 +1251,8 @@
                                 <div class="metric-name">Cohen's Kappa</div>
                             </div>
                         </div>
-                        <div style="margin-top: 14px; font-size: 0.72rem; color: var(--text-faint); text-align: center; border-top: 1px dashed var(--border); padding-top: 14px;">
-                            ⏱️ Waktu Eksekusi Model: <strong style="color: var(--text-primary);">{{ waktu_eksekusi }}</strong> detik
+                        <div class="exec-time">
+                            ⏱️ Waktu Eksekusi Model: <strong>{{ waktu_eksekusi }}</strong> detik
                         </div>
                     </div>
                     {% endif %}
@@ -1016,8 +1281,11 @@
                         </div>
 
                         {% if kesimpulan %}
-                        <div class="speedometer-conclusion {% if sentimen == 'Positif' %}pos{% elif sentimen == 'Negatif' %}neg{% endif %}">
-                            <span style="font-weight: 700; display: block; margin-bottom: 4px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.6;">💡 Kesimpulan Analisis</span>
+                        <div
+                            class="speedometer-conclusion {% if sentimen == 'Positif' %}pos{% elif sentimen == 'Negatif' %}neg{% endif %}">
+                            <span
+                                style="font-weight: 700; display: block; margin-bottom: 4px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.6;">💡
+                                Kesimpulan Analisis</span>
                             {{ kesimpulan }}
                         </div>
                         {% endif %}
@@ -1027,20 +1295,22 @@
                 <div class="result-section empty-state-wrapper">
                     <div class="empty-state">
                         <div>
-                            <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.4;">🔍</div>
-                            Silakan masukkan teks ulasan dan pilih algoritma untuk melihat hasil analisis sentimen di sini.
+                            <div class="empty-state-icon">🔍</div>
+                            Silakan masukkan teks ulasan dan pilih algoritma untuk melihat hasil analisis sentimen di
+                            sini.
                         </div>
                     </div>
                 </div>
                 {% endif %}
             </div>
-
-            <div class="footer">
-                © 2026 PLN Mobile Sentiment Analyzer · Powered by IndoBERT & VADER<br>
-                <span style="opacity: 0.7; display: inline-block; margin-top: 3px;">Developed by Muhammad Dhafa Mahardhika (15220671)</span><br>
-                <span style="opacity: 0.7; display: inline-block; margin-top: 2px;">Dosen Pembimbing: Yuris Alkhalifi, M.Kom</span>
-            </div>
         </div>
+
+        <div class="footer">
+            © 2026 PLN Mobile Sentiment Analyzer · Powered by IndoBERT & VADER<br>
+            <span class="footer-line">Developed by Muhammad Dhafa Mahardhika (15220671)</span><br>
+            <span class="footer-line">Dosen Pembimbing: Yuris Alkhalifi, M.Kom</span>
+        </div>
+    </div>
     </div>
 
     <!-- Modal Performa Model -->
@@ -1054,22 +1324,26 @@
                 <div class="model-comparison" id="modelComparison">
                     <!-- IndoBERT -->
                     <div class="model-stats" id="statsIndoBERT">
-                        <div class="ms-title" style="color: #60a5fa;">🧠 IndoBERT</div>
+                        <div class="ms-title" style="color: #6ba3fa;">🧠 IndoBERT</div>
                         <div class="metrics-grid">
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_indobert.akurasi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_indobert.akurasi|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">Akurasi</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_indobert.presisi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_indobert.presisi|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">Presisi</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_indobert.recall|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_indobert.recall|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">Recall</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_indobert.f1|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_indobert.f1|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">F1-Score</div>
                             </div>
                             <div class="metric-card kappa-card">
@@ -1083,19 +1357,23 @@
                         <div class="ms-title" style="color: #34d399;">📊 VADER</div>
                         <div class="metrics-grid">
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_vader.akurasi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_vader.akurasi|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">Akurasi</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_vader.presisi|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_vader.presisi|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">Presisi</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_vader.recall|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_vader.recall|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">Recall</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{{ base_metrik_vader.f1|default:"-" }}<span class="metric-unit">%</span></div>
+                                <div class="metric-value">{{ base_metrik_vader.f1|default:"-" }}<span
+                                        class="metric-unit">%</span></div>
                                 <div class="metric-name">F1-Score</div>
                             </div>
                             <div class="metric-card kappa-card">
@@ -1105,7 +1383,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 14px; font-size: 0.72rem; color: #6b7280; text-align: center;">
+                <div class="modal-note">
                     Metrik evaluasi didapatkan dari pengujian test set asli model.
                 </div>
             </div>
@@ -1124,7 +1402,7 @@
         }
 
         // Form submit with validation
-        document.getElementById('sentimentForm').addEventListener('submit', function(e) {
+        document.getElementById('sentimentForm').addEventListener('submit', function (e) {
             const algoValue = document.getElementById('algoritma_input').value;
             const warning = document.getElementById('algoWarning');
             if (!algoValue) {
@@ -1140,12 +1418,12 @@
             document.getElementById('btnSubmit').classList.add('loading');
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Animate gauge
             const gaugeBg = document.querySelector('.gauge-bg');
             const gaugeNeedle = document.querySelector('.gauge-needle');
             if (gaugeBg && gaugeNeedle) {
-                setTimeout(function() {
+                setTimeout(function () {
                     const negVal = gaugeBg.getAttribute('data-neg');
                     gaugeBg.style.setProperty('--neg-pct', negVal);
                     gaugeNeedle.style.setProperty('--neg-pct', negVal);
@@ -1175,24 +1453,24 @@
             }
 
             if (btnInfoModelIndoBERT) {
-                btnInfoModelIndoBERT.addEventListener('click', function(e) {
+                btnInfoModelIndoBERT.addEventListener('click', function (e) {
                     e.stopPropagation();
                     showModal('IndoBERT');
                 });
             }
             if (btnInfoModelVADER) {
-                btnInfoModelVADER.addEventListener('click', function(e) {
+                btnInfoModelVADER.addEventListener('click', function (e) {
                     e.stopPropagation();
                     showModal('VADER');
                 });
             }
             if (closeModal) {
-                closeModal.addEventListener('click', function() {
+                closeModal.addEventListener('click', function () {
                     modelModal.classList.remove('active');
                 });
             }
             if (modelModal) {
-                modelModal.addEventListener('click', function(e) {
+                modelModal.addEventListener('click', function (e) {
                     if (e.target === modelModal) {
                         modelModal.classList.remove('active');
                     }
@@ -1203,7 +1481,7 @@
             const chips = document.querySelectorAll('.algo-chip');
             const hiddenInput = document.getElementById('algoritma_input');
             chips.forEach(chip => {
-                chip.addEventListener('click', function() {
+                chip.addEventListener('click', function () {
                     chips.forEach(c => c.classList.remove('selected'));
                     this.classList.add('selected');
                     hiddenInput.value = this.getAttribute('data-value');
@@ -1221,7 +1499,7 @@
                 themeToggle.textContent = '☀️';
             }
 
-            themeToggle.addEventListener('click', function() {
+            themeToggle.addEventListener('click', function () {
                 const isLight = document.documentElement.getAttribute('data-theme') === 'light';
                 if (isLight) {
                     document.documentElement.removeAttribute('data-theme');
@@ -1236,4 +1514,5 @@
         });
     </script>
 </body>
+
 </html>
