@@ -9,8 +9,9 @@ Aplikasi web berbasis Django untuk melakukan analisis sentimen terhadap ulasan a
 - **Klasifikasi Sentimen Biner**: Mengklasifikasikan ulasan pengguna menjadi **Positif** atau **Negatif**.
 - **Perbandingan Model**: Pengguna dapat memilih antara model IndoBERT (bahasa Indonesia asli) atau VADER (menerjemahkan teks ke bahasa Inggris terlebih dahulu).
 - **Teks Terjemahan Otomatis**: Khusus untuk VADER, aplikasi akan menampilkan teks hasil terjemahan bahasa Inggris yang digunakan untuk prediksi skor.
-- **Metrik Evaluasi Real-time**: Menampilkan performa model berdasarkan *test set* berupa metrik Akurasi, Presisi, Recall, F1-Score, dan Cohen's Kappa.
-- **Confidence Level**: Menunjukkan tingkat keyakinan (probabilitas) dari model terhadap hasil prediksinya dalam bentuk persentase dan *progress bar* visual.
+- **Metrik Evaluasi Dinamis (Heuristik)**: Menampilkan estimasi performa dinamis (Akurasi/Keyakinan, Presisi, Recall, F1-Score, Cohen's Kappa) yang dihitung berdasarkan *confidence score* dari kalimat yang sedang diinput.
+- **Informasi Performa Base Model**: Performa evaluasi asli dari *test set* secara statis dapat dilihat dengan mengklik tombol informasi (!) pada algoritma.
+- **Indikator Visual**: Menunjukkan persentase sentimen Positif/Negatif secara visual melalui grafik jarum/speedometer.
 
 ## 🛠️ Teknologi yang Digunakan
 - **Backend Framework**: Django (Python)
@@ -54,6 +55,8 @@ Aplikasi web berbasis Django untuk melakukan analisis sentimen terhadap ulasan a
 4. **Jika VADER dipilih:** Teks diterjemahkan ke bahasa Inggris menggunakan `googletrans`. Teks bahasa Inggris tersebut dinilai oleh *SentimentIntensityAnalyzer*. Skor *compound* >= 0.05 dianggap Positif, selebihnya Negatif.
 5. Prediksi, *confidence score*, teks terjemahan (untuk VADER), dan metrik evaluasi dikirim kembali dan dirender ke dalam `index.html`.
 
-## 📜 Lisensi & Atribusi
+## 📜 Pengembang & Atribusi
+- **Pengembang**: Muhammad Dhafa Mahardhika (15220671)
+- **Dosen Pembimbing**: Yuris Alkhalifi, M.Kom
 - Model IndoBERT dilatih dari dataset publik ulasan aplikasi PLN Mobile.
 - VADER Sentiment adalah model *open-source* berbasis aturan (lexicon-rule based).
